@@ -54,9 +54,10 @@ class NewBuilder : (Context) -> Builder {
  * </code></pre>
  */
 @JvmOverloads
-fun Fragment.alert(@StringRes message: Int, @StringRes title: Int = 0, block: Builder.() -> Unit): AlertDialog =
+fun Fragment.alert(@StringRes message: Int, @StringRes title: Int = -1, block: Builder.() -> Unit): AlertDialog =
         newBuilder(requireContext()).run {
-            setTitle(title)
+            if (title != -1)
+                setTitle(title)
             setMessage(message)
             block()
             showDialog()
@@ -72,9 +73,10 @@ fun Fragment.alert(message: CharSequence, title: CharSequence? = null, block: Bu
         }
 
 @JvmOverloads
-fun AppCompatActivity.alert(@StringRes message: Int, @StringRes title: Int = 0, block: Builder.() -> Unit): AlertDialog =
+fun AppCompatActivity.alert(@StringRes message: Int, @StringRes title: Int = -1, block: Builder.() -> Unit): AlertDialog =
         newBuilder(this).run {
-            setTitle(title)
+            if (title != -1)
+                setTitle(title)
             setMessage(message)
             block()
             showDialog()
