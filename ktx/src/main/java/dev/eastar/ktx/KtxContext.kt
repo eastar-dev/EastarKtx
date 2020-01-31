@@ -36,6 +36,10 @@ import androidx.annotation.RawRes
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.ProcessLifecycleOwner
 
 class KKContext
 
@@ -52,8 +56,8 @@ fun Context.versionCode(packageName: String) = runCatching { PackageInfoCompat.g
 
 infix fun Context.toast(text: CharSequence) = Toast.makeText(this, text, Toast.LENGTH_LONG).show()
 fun Context.pendingIntent(intent_text: String?): PendingIntent? = runCatching { PendingIntent.getActivity(this, 0, intent_text.intent, PendingIntent.FLAG_UPDATE_CURRENT) }.getOrNull()
-fun Context.getStringFromRaw(@RawRes resId: Int) = resources.openRawResource(resId).text
-fun Context.toString(@RawRes raw_resId: Int): String = resources.openRawResource(raw_resId).text
+
+fun Context.getRawString(@RawRes rawResId: Int) = resources.openRawResource(rawResId).text
 fun Context.getDrawableId(drawable_name: String): Int = getResId(drawable_name, "drawable", packageName)
 fun Context.getResId(name: String, defType: String, defPackage: String): Int = resources.getIdentifier(name, defType, defPackage)
 fun Context.getResourceEntryName(@AnyRes resId: Int): String = resources.getResourceEntryName(resId)
@@ -86,12 +90,6 @@ val Context.networkOperatorName: String
         }
     }.getOrDefault("")
 
-//-----------------------------------------------------------
-val Context.isForeground1: Boolean
-    get() = activityManager.runningAppProcesses?.any {
-        it.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
-    } ?: false
-
 fun Activity.keepScreenOn() = window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 fun Activity.keepScreenOff() = window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -102,32 +100,14 @@ fun Context.getThemeString(attr_id: Int): CharSequence {
 }
 
 fun Context.startSetting() = startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-fun Context.startMain() = runCatching { getMainIntent(packageName)?.let { startActivity(it.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)) } }.getOrElse { }
-fun Context.getMainIntent(): Intent? = getMainIntent(packageName)
-fun Context.getMainIntent(packageName: String) = runCatching { packageManager.getLaunchIntentForPackage(packageName) }.getOrNull()
-fun Context.startMarket() = startMarket(packageName)
+fun Context.startMain() = startActivity(mainIntent)
+val Context.mainIntent get() = packageManager.getLaunchIntentForPackage(packageName)!!.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
-//-------------------------------------------------------------------------------------
-fun Fragment.startActivity(intent_text: String?) = runCatching { startActivity(intent_text.intent) }.getOrElse {}
-
-fun <T : Activity> Fragment.startActivity(clz: Class<T>) = runCatching { startActivity(Intent(requireContext(), clz)) }.getOrElse {}
-
-fun Fragment.startActivityOrMarket(intent_text: String?) = startActivityOrMarket(intent_text.intent)
-fun Fragment.startActivityOrMarket(intent: Intent?) = runCatching { startActivity(intent) }.getOrElse { intent?.`package`?.takeUnless { it.isBlank() }?.let { startMarket(it) } }
-fun Fragment.startMarket(packageName: String) {
-    runCatching {
-        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")!!))
-    }.recoverCatching {
-        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=$packageName")))
-    }.getOrElse { }
+fun Context.startPackage(packageName: String) {
+    kotlin.runCatching { startActivity(packageManager.getLaunchIntentForPackage(packageName)) }
 }
 
-//-------------------------------------------------------------------------------------
-fun Context.startActivity(intent_text: String?) = runCatching { startActivity(intent_text.intent) }.getOrElse { }
-
-fun <T : Activity> Context.startActivity(clz: Class<T>) = runCatching { startActivity(Intent(this, clz)) }.getOrElse {}
-fun Context.startActivityOrMarket(intent_text: String?) = startActivityOrMarket(intent_text.intent)
-fun Context.startActivityOrMarket(intent: Intent?) = runCatching { startActivity(intent) }.getOrElse { intent?.`package`?.takeUnless { it.isBlank() }?.let { startMarket(it) } }
+fun Context.startMarket() = startMarket(packageName)
 fun Context.startMarket(packageName: String) {
     runCatching {
         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")!!))
@@ -136,25 +116,43 @@ fun Context.startMarket(packageName: String) {
     }.getOrElse { }
 }
 
-//-------------------------------------------------------------------------------------
-fun Context.getIntent(clz: Class<out Activity>, vararg extras: Pair<String, Any?>): Intent = Intent(this, clz).putExtras(bundleOf(*extras))
-
-fun Fragment.getIntent(clz: Class<out Activity>, vararg extras: Pair<String, Any?>): Intent = requireContext().getIntent(clz, *extras)
-
-//-------------------------------------------------------------------------------------
-fun View.setIntent(clz: Class<out Activity>, vararg extras: Pair<String, Any?>) {
-    return context.startActivity(context.getIntent(clz, *extras))
+fun Fragment.startMarket(packageName: String) {
+    runCatching {
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")!!))
+    }.recoverCatching {
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=$packageName")))
+    }.getOrElse { }
 }
 
-fun Activity.startActivity(clz: Class<out Activity>, vararg extras: Pair<String, Any?>) {
-    startActivityForResult(getIntent(clz, *extras), -1)
+val CharSequence?.intent: Intent? get() = kotlin.runCatching { Intent.parseUri(toString(), Intent.URI_INTENT_SCHEME) }.getOrNull()
+//-------------------------------------------------------------------------------------
+fun Fragment.startActivity(intent_text: String?) {
+    kotlin.runCatching { startActivity(intent_text.intent) }
 }
 
 fun Fragment.startActivity(clz: Class<out Activity>, vararg extras: Pair<String, Any?>) {
-    startActivityForResult(getIntent(clz, *extras), -1)
+    kotlin.runCatching { startActivity(Intent(requireContext(), clz).putExtras(bundleOf(*extras))) }
 }
 
-fun Activity.setIntentForResult(clz: Class<out Activity>, requestCode: Int = -1, vararg extras: Pair<String, Any?>) {
+fun Fragment.startActivityOrMarket(intent_text: String?) = startActivityOrMarket(intent_text.intent)
+fun Fragment.startActivityOrMarket(intent: Intent?) = kotlin.runCatching { startActivity(intent) }.getOrElse { intent?.`package`?.takeUnless { it.isBlank() }?.let { startMarket(it) } }
+
+//-------------------------------------------------------------------------------------
+fun Context.startActivity(clz: Class<out Activity>, vararg extras: Pair<String, Any?>) {
+    kotlin.runCatching { startActivity(Intent(this, clz).putExtras(bundleOf(*extras))) }
+}
+
+fun Context.startActivityOrMarket(intent_text: String?) = startActivityOrMarket(intent_text.intent)
+fun Context.startActivityOrMarket(intent: Intent?) = kotlin.runCatching { startActivity(intent) }.getOrElse { intent?.`package`?.takeUnless { it.isBlank() }?.let { startMarket(it) } }
+
+//-------------------------------------------------------------------------------------
+fun Context.getIntent(clz: Class<out Activity>, vararg extras: Pair<String, Any?>): Intent = Intent(this, clz).putExtras(bundleOf(*extras))
+
+fun Fragment.getIntent(clz: Class<out Activity>, vararg extras: Pair<String, Any?>): Intent = Intent(requireContext(), clz).putExtras(bundleOf(*extras))
+
+//-------------------------------------------------------------------------------------
+
+fun Activity.startActivityForResult(clz: Class<out Activity>, requestCode: Int = -1, vararg extras: Pair<String, Any?>) {
     startActivityForResult(getIntent(clz, *extras), requestCode)
 }
 
@@ -162,9 +160,29 @@ fun Fragment.setIntentForResult(clz: Class<out Activity>, requestCode: Int = -1,
     startActivityForResult(getIntent(clz, *extras), requestCode)
 }
 
+fun View.setIntent(clz: Class<out Activity>, vararg extras: Pair<String, Any?>) {
+    setOnClickListener { it.context.startActivity(clz, *extras) }
+}
+
 //-------------------------------------------------------------------------------------
+fun Application.lifecycleObserver() = ProcessLifecycleOwner.get().lifecycle.addObserver(object : LifecycleObserver {
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    fun onForeground() {
+        android.util.Log.e("lifecycleObserver", "onForeground")
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    fun onBackground() {
+        android.util.Log.w("lifecycleObserver", "onForeground")
+    }
+})
+
 //-------------------------------------------------------------------------------------
 
+val Context.isForeground1: Boolean
+    get() = activityManager.runningAppProcesses?.any {
+        it.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+    } ?: false
 val Context.isForeground2: Boolean get() = topActivity?.packageName == packageName
 val Context.topActivity: ComponentName? get() = activityManager.getRunningTasks(1)?.firstOrNull()?.topActivity
 

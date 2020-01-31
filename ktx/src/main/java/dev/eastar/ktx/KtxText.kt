@@ -43,12 +43,7 @@ val Number.d: Double get() = toDouble()
 
 val Long.toTimeText: String get() = SimpleDateFormat("yyyy.MM.dd HH:mm:ss", Locale.getDefault()).format(this)
 
-val CharSequence?.intent: Intent?
-    get() = try {
-        Intent.parseUri(toString(), Intent.URI_INTENT_SCHEME)
-    } catch (e: URISyntaxException) {
-        null
-    }
+
 
 fun String?.isNotNullOrBlank() = !this.isNullOrBlank()
 fun String?.isNotNullOrEmpty() = !this.isNullOrEmpty()
