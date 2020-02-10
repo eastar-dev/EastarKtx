@@ -20,10 +20,8 @@ package dev.eastar.ktx
 import android.annotation.SuppressLint
 import android.app.*
 import android.content.*
-import android.content.Context.CONNECTIVITY_SERVICE
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.net.Uri
+import android.net.*
+import android.net.ConnectivityManager.NetworkCallback
 import android.os.Build
 import android.provider.Settings
 import android.telephony.TelephonyManager
@@ -33,6 +31,8 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.annotation.AnyRes
 import androidx.annotation.RawRes
+import androidx.annotation.RequiresApi
+import androidx.core.content.getSystemService
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -43,10 +43,10 @@ import androidx.lifecycle.ProcessLifecycleOwner
 
 class KKContext
 
-val Context.notificationManager: NotificationManager get() = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-val Context.clipboardManager: ClipboardManager get() = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-val Context.telephonyManager: TelephonyManager get() = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-val Context.activityManager: ActivityManager get() = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+val Context.notificationManager: NotificationManager? get() = getSystemService()
+val Context.clipboardManager: ClipboardManager? get() = getSystemService()
+val Context.telephonyManager: TelephonyManager? get() = getSystemService()
+val Context.activityManager: ActivityManager? get() = getSystemService()
 
 val Context.appName: CharSequence get() = packageManager.getApplicationLabel(packageManager.getApplicationInfo(packageName, 0))
 val Context.versionName: String get() = packageManager.getPackageInfo(packageName, 0).versionName
@@ -63,29 +63,31 @@ fun Context.getResourceEntryName(@AnyRes resId: Int): String = resources.getReso
 
 infix fun Context.copy(text: String) {
     val clip = ClipData.newPlainText("label", text)
-    clipboardManager.setPrimaryClip(clip)
-    toast(clip.getItemAt(0).text.toString() + " 복사되었습니다.")
+    clipboardManager?.run {
+        setPrimaryClip(clip)
+        toast(clip.getItemAt(0).text.toString() + " 복사되었습니다.")
+    }
 }
 
 val Context.isDeviceLock: Boolean
-    get() = (getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager)?.run {
+    get() = getSystemService<KeyguardManager>()?.run {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) isDeviceSecure else isKeyguardSecure
     } ?: false
 
 val Context.line1Number: String
     @SuppressLint("MissingPermission", "HardwareIds")
-    get() = telephonyManager.line1Number ?: ""
+    get() = telephonyManager?.line1Number ?: ""
 
 /** SKT("45005"), LG("45006"), KT("45008") */
-val Context.networkOperator: String get() = telephonyManager.networkOperator ?: ""
+val Context.networkOperator: String get() = telephonyManager?.networkOperator ?: ""
 
 val Context.networkOperatorName: String
     get() = runCatching {
-        when (telephonyManager.networkOperator) {
+        when (telephonyManager?.networkOperator) {
             "45005" -> "SKT"
             "45006" -> "LGT"
             "45008" -> "KT"
-            else -> telephonyManager.networkOperatorName.urlEncodeEuckr
+            else -> telephonyManager?.networkOperatorName.urlEncodeEuckr
         }
     }.getOrDefault("")
 
@@ -186,38 +188,44 @@ fun Application.lifecycleObserver() = ProcessLifecycleOwner.get().lifecycle.addO
 })
 
 //-------------------------------------------------------------------------------------
-
 val Context.isForeground1: Boolean
-    get() = activityManager.runningAppProcesses?.any {
+    get() = activityManager?.runningAppProcesses?.any {
         it.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
     } ?: false
 val Context.isForeground2: Boolean get() = topActivity?.packageName == packageName
-val Context.topActivity: ComponentName? get() = activityManager.getRunningTasks(1)?.firstOrNull()?.topActivity
+val Context.topActivity: ComponentName? get() = activityManager?.getRunningTasks(1)?.firstOrNull()?.topActivity
 
-//<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 @SuppressLint("MissingPermission")
 fun Context.isNetworkAvailable(): Boolean {
-    val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        val capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-        capabilities?.run {
-            return when {
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH) -> true
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN) -> true
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_LOWPAN) -> true
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI_AWARE) -> true
-                else -> false
-            }
+    val connectivityManager: ConnectivityManager? = getSystemService()
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val capabilities = connectivityManager?.getNetworkCapabilities(connectivityManager.activeNetwork)
+        capabilities ?: return false
+        return when {
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH) -> true
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN) -> true
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_LOWPAN) -> true
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI_AWARE) -> true
+            else -> false
         }
     } else {
-        runCatching {
-            connectivityManager.activeNetworkInfo?.run {
-                return isConnected
-            }
-        }.getOrDefault(false)
+        connectivityManager?.activeNetworkInfo?.isConnected ?: false
     }
-    return false
+}
+
+@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+fun Context.registerNetworkCallback() {
+    val connectivityManager: ConnectivityManager? = getSystemService()
+    connectivityManager?.registerNetworkCallback(NetworkRequest.Builder().build(), object : NetworkCallback() {
+        override fun onLost(network: Network) {
+            android.util.Log.e("registerNetworkCallback", "Network onLost")
+        }
+
+        override fun onAvailable(network: Network) {
+            android.util.Log.e("registerNetworkCallback", "Network onAvailable")
+        }
+    })
 }
