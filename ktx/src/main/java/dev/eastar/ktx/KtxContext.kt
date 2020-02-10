@@ -98,9 +98,8 @@ fun Context.getThemeString(attr_id: Int): CharSequence {
     return outValue.string
 }
 
-fun View.setIntent(clz: Class<out Activity>, vararg extras: Pair<String, Any?>) {
-    setOnClickListener { it.context.startActivity(clz, *extras) }
-}
+fun View.setIntent(clz: Class<out Activity>, vararg extras: Pair<String, Any?>) = setOnClickListener { it.context.startActivity(clz, *extras) }
+fun View.setIntent(intent: Intent) = setOnClickListener { it.context.startActivity(intent) }
 
 fun String?.toIntent(): Intent? = kotlin.runCatching { Intent.parseUri(this, Intent.URI_INTENT_SCHEME) }.getOrNull()
 fun Intent?.toText(): String? = kotlin.runCatching { this?.toUri(Intent.URI_INTENT_SCHEME) }.getOrNull()
