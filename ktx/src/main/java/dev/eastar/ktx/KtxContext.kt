@@ -54,13 +54,6 @@ val Context.versionCode get() = versionCode(packageName)
 fun Context.isInstall(packageName: String) = versionCode(packageName) > 0L
 fun Context.versionCode(packageName: String) = runCatching { PackageInfoCompat.getLongVersionCode(packageManager.getPackageInfo(packageName, 0)) }.getOrDefault(-1L)
 
-infix fun Context.toast(text: CharSequence) = Toast.makeText(this, text, Toast.LENGTH_LONG).show()
-
-fun Context.getRawString(@RawRes rawResId: Int) = resources.openRawResource(rawResId).text
-fun Context.getDrawableId(drawable_name: String): Int = getResId(drawable_name, "drawable", packageName)
-fun Context.getResId(name: String, defType: String, defPackage: String): Int = resources.getIdentifier(name, defType, defPackage)
-fun Context.getResourceEntryName(@AnyRes resId: Int): String = resources.getResourceEntryName(resId)
-
 infix fun Context.copy(text: String) {
     val clip = ClipData.newPlainText("label", text)
     clipboardManager?.run {
@@ -90,6 +83,18 @@ val Context.networkOperatorName: String
             else -> telephonyManager?.networkOperatorName.urlEncodeEuckr
         }
     }.getOrDefault("")
+
+infix fun Context.toast(text: CharSequence) = Toast.makeText(this, text, Toast.LENGTH_LONG).show()
+infix fun Fragment.toast(text: CharSequence) = Toast.makeText(requireContext(), text, Toast.LENGTH_LONG).show()
+
+fun Context.getRawString(@RawRes rawResId: Int) = resources.openRawResource(rawResId).text
+fun Context.getDrawableId(drawable_name: String): Int = getResId(drawable_name, "drawable", packageName)
+fun Context.getResId(name: String, defType: String, defPackage: String): Int = resources.getIdentifier(name, defType, defPackage)
+fun Context.getResourceEntryName(@AnyRes resId: Int): String = resources.getResourceEntryName(resId)
+fun Fragment.getRawString(@RawRes rawResId: Int) = resources.openRawResource(rawResId).text
+fun Fragment.getDrawableId(drawable_name: String): Int = getResId(drawable_name, "drawable", requireContext().packageName)
+fun Fragment.getResId(name: String, defType: String, defPackage: String): Int = resources.getIdentifier(name, defType, defPackage)
+fun Fragment.getResourceEntryName(@AnyRes resId: Int): String = resources.getResourceEntryName(resId)
 
 fun Activity.keepScreenOn() = window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 fun Activity.keepScreenOff() = window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
