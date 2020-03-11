@@ -220,6 +220,7 @@ fun Context.isNetworkAvailable(): Boolean {
     }
 }
 
+@SuppressLint("MissingPermission")
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 fun Context.registerNetworkCallback() {
     val connectivityManager: ConnectivityManager? = getSystemService()
