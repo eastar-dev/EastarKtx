@@ -17,15 +17,14 @@
 
 package dev.eastar.ktx
 
-import android.content.Intent
 import android.content.res.Resources
 import android.telephony.PhoneNumberUtils
+import android.util.Base64
 import android.util.TypedValue
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.InputStream
 import java.io.UnsupportedEncodingException
-import java.net.URISyntaxException
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.security.MessageDigest
@@ -44,7 +43,6 @@ val Number.d: Double get() = toDouble()
 val Long.toTimeText: String get() = SimpleDateFormat("yyyy.MM.dd HH:mm:ss", Locale.getDefault()).format(this)
 
 
-
 fun String?.isNotNullOrBlank() = !this.isNullOrBlank()
 fun String?.isNotNullOrEmpty() = !this.isNullOrEmpty()
 
@@ -58,14 +56,14 @@ fun String.takePadKr(length: Int = 10, padChar: Char = ' '): String = takeKr(len
 fun String.takeKr(length: Int = 10): String {
     var lengthKr = 0
     return toString()
-            .takeWhile {
-                val count = if (it.toInt() in 0x00..0x7f) 1 else 2
-                if (lengthKr + count <= length) {
-                    lengthKr += count
-                    true
-                } else
-                    false
-            }
+        .takeWhile {
+            val count = if (it.toInt() in 0x00..0x7f) 1 else 2
+            if (lengthKr + count <= length) {
+                lengthKr += count
+                true
+            } else
+                false
+        }
 }
 
 fun String.padEndKr(length: Int = 10, padChar: Char = ' '): String = padEnd(length - (lengthKr - this.length), padChar)
@@ -116,8 +114,8 @@ val String.numberText: String
 
             numSum += num
             result.append((if (po == 0 && num == 1) "일" else number[num])
-                    + (if (num > 0) unit4[po % 4] else "")
-                    + if (numSum > 0 && po % 4 == 0) unit[po / 4] + "" else ""
+                + (if (num > 0) unit4[po % 4] else "")
+                + if (numSum > 0 && po % 4 == 0) unit[po / 4] + "" else ""
             )
             if (po % 4 == 0)
                 numSum = 0
@@ -185,3 +183,7 @@ val String?.toPrettyJson: String
         }
     }.getOrDefault("")
 
+val CharSequence?.base64Encode: String get() = this?.toString().base64Encode
+val CharSequence?.base64Decode: String get() = this?.toString().base64Decode
+val String?.base64Encode: String get() = kotlin.runCatching { Base64.encodeToString(this?.toByteArray(), Base64.NO_WRAP) }.getOrDefault("")
+val String?.base64Decode: String get() = kotlin.runCatching { Base64.decode(this?.toByteArray(), Base64.NO_WRAP).toString(Charsets.UTF_8) }.getOrDefault("")
