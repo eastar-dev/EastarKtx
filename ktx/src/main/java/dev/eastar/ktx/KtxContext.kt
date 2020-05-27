@@ -32,6 +32,7 @@ import android.widget.Toast
 import androidx.annotation.AnyRes
 import androidx.annotation.RawRes
 import androidx.annotation.RequiresApi
+import androidx.annotation.StringRes
 import androidx.core.content.getSystemService
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.os.bundleOf
@@ -86,6 +87,8 @@ val Context.networkOperatorName: String
 
 infix fun Context.toast(text: CharSequence) = Toast.makeText(this, text, Toast.LENGTH_LONG).show()
 infix fun Fragment.toast(text: CharSequence) = Toast.makeText(requireContext(), text, Toast.LENGTH_LONG).show()
+infix fun Context.toast(@StringRes textRes: Int) = toast(getString(textRes))
+infix fun Fragment.toast(@StringRes textRes: Int) = toast(getString(textRes))
 
 fun Context.getRawString(@RawRes rawResId: Int) = resources.openRawResource(rawResId).text
 fun Context.getDrawableId(drawable_name: String): Int = getResId(drawable_name, "drawable", packageName)
