@@ -26,8 +26,6 @@ import android.view.View
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 
-class KKIntent
-
 
 //@Suppress("UNCHECKED_CAST")
 //private fun Array<*>.toPair(): Array<kotlin.Pair<String, Any?>> {
@@ -52,6 +50,7 @@ fun Fragment.toIntent(clz: Class<out Activity>, vararg extras: Pair<String, Any?
 
 val Context.mainIntent get() = packageManager.getLaunchIntentForPackage(packageName)!!.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
 val Fragment.mainIntent get() = requireContext().packageManager.getLaunchIntentForPackage(requireContext().packageName)!!.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+
 //-------------------------------------------------------------------------------------
 fun Fragment.startActivity(text: String?) = kotlin.runCatching { startActivity(text.toIntent()) }.getOrDefault(Unit)
 fun Context.startActivity(text: String?) = kotlin.runCatching { startActivity(text.toIntent()) }.getOrDefault(Unit)

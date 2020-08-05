@@ -48,8 +48,6 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 
-class KKContext
-
 val Context.notificationManager: NotificationManager? get() = getSystemService()
 val Context.clipboardManager: ClipboardManager? get() = getSystemService()
 val Context.telephonyManager: TelephonyManager? get() = getSystemService()
@@ -70,18 +68,18 @@ infix fun Context.copy(text: String) {
 }
 
 
-fun Application.activityStartedRunner(callback: Activity.() -> Unit) =
+fun Application.registerActivityStartedLifecycleCallbacks(callback: Activity.() -> Unit) =
     registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
-        //@formatter:off
-        @RequiresApi(Build.VERSION_CODES.KITKAT_WATCH)
-        override fun onActivityStarted(activity: Activity?) { callback(activity!!) }
-        override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {}
-        override fun onActivityDestroyed(activity: Activity?) {}
-        override fun onActivityStopped(activity: Activity?) {}
-        override fun onActivityPaused(activity: Activity?) {}
-        override fun onActivityResumed(activity: Activity?) {}
-        override fun onActivitySaveInstanceState(activity: Activity?, outState: Bundle?) {}
-        //@formatter:on
+        override fun onActivityStarted(activity: Activity) {
+            callback(activity)
+        }
+
+        override fun onActivityCreated(activity: Activity, bundle: Bundle?) {}
+        override fun onActivityResumed(activity: Activity) {}
+        override fun onActivityPaused(activity: Activity) {}
+        override fun onActivityStopped(activity: Activity) {}
+        override fun onActivitySaveInstanceState(activity: Activity, bundle: Bundle) {}
+        override fun onActivityDestroyed(activity: Activity) {}
     })
 
 

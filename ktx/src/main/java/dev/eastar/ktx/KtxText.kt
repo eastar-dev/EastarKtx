@@ -33,8 +33,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
 
-class KKText
-
 val Number.dpf: Float get() = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, toFloat(), Resources.getSystem().displayMetrics)
 val Number.dp: Int get() = dpf.roundToInt()
 val Number.i: Int get() = toInt()

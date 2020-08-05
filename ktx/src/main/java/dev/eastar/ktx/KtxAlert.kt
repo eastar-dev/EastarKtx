@@ -28,8 +28,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 
-class KKAlert
-
 var newBuilder: ((Context) -> Builder) = NewBuilder()
 
 class NewBuilder : (Context) -> Builder {
@@ -55,47 +53,47 @@ class NewBuilder : (Context) -> Builder {
  */
 @JvmOverloads
 fun Fragment.alert(@StringRes message: Int, @StringRes title: Int = -1, block: Builder.() -> Unit): AlertDialog =
-        newBuilder(requireContext()).run {
-            if (title != -1)
-                setTitle(title)
-            setMessage(message)
-            block()
-            showDialog()
-        }
+    newBuilder(requireContext()).run {
+        if (title != -1)
+            setTitle(title)
+        setMessage(message)
+        block()
+        showDialog()
+    }
 
 @JvmOverloads
 fun Fragment.alert(message: CharSequence, title: CharSequence? = null, block: Builder.() -> Unit): AlertDialog =
-        newBuilder(requireContext()).run {
-            setTitle(title)
-            setMessage(message)
-            block()
-            showDialog()
-        }
+    newBuilder(requireContext()).run {
+        setTitle(title)
+        setMessage(message)
+        block()
+        showDialog()
+    }
 
 @JvmOverloads
 fun AppCompatActivity.alert(@StringRes message: Int, @StringRes title: Int = -1, block: Builder.() -> Unit): AlertDialog =
-        newBuilder(this).run {
-            if (title != -1)
-                setTitle(title)
-            setMessage(message)
-            block()
-            showDialog()
-        }
+    newBuilder(this).run {
+        if (title != -1)
+            setTitle(title)
+        setMessage(message)
+        block()
+        showDialog()
+    }
 
 @JvmOverloads
 fun AppCompatActivity.alert(message: CharSequence, title: CharSequence? = null, block: Builder.() -> Unit): AlertDialog =
-        newBuilder(this).run {
-            setTitle(title)
-            setMessage(message)
-            block()
-            showDialog()
-        }
+    newBuilder(this).run {
+        setTitle(title)
+        setMessage(message)
+        block()
+        showDialog()
+    }
 
 private fun Builder.showDialog(): AlertDialog =
-        create().apply {
-            setCanceledOnTouchOutside(false)
-            show()
-        }
+    create().apply {
+        setCanceledOnTouchOutside(false)
+        show()
+    }
 
 fun Builder.positiveButton(text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setPositiveButton(text) { dialog, which -> cb?.invoke(which) }
 fun Builder.negativeButton(text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setNegativeButton(text) { dialog, which -> cb?.invoke(which) }
@@ -118,10 +116,10 @@ object NoMore {
 
     //다시보지않기를 눌렀는지 확인
     fun getNoMore(context: Context, key: String): Long = context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
-            .getLong(key.md5, 0L)
+        .getLong(key.md5, 0L)
 
     fun setNoMore(context: Context, key: String) = context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
-            .edit(true) { putLong(key.md5, System.currentTimeMillis()) }
+        .edit(true) { putLong(key.md5, System.currentTimeMillis()) }
 
     fun clear(context: Context) = context.getSharedPreferences(NAME, Context.MODE_PRIVATE).edit(true) { clear() }
 }
