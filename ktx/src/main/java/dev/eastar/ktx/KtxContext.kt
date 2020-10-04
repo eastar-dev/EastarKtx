@@ -17,12 +17,14 @@
 
 package dev.eastar.ktx
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.*
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.ComponentName
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
@@ -40,6 +42,7 @@ import androidx.annotation.AnyRes
 import androidx.annotation.RawRes
 import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
+import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.fragment.app.Fragment
@@ -99,7 +102,16 @@ val Context.isDeviceLock: Boolean
 
 val Context.line1Number: String
     @SuppressLint("MissingPermission", "HardwareIds")
-    get() = telephonyManager?.line1Number ?: ""
+    get() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_PHONE_NUMBERS, Manifest.permission.READ_PHONE_STATE)
+        } else {
+            arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_PHONE_STATE)
+        }.any { PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this@line1Number, it) }
+            .takeIf { it } ?: return ""
+
+        return telephonyManager?.line1Number ?: ""
+    }
 
 /** SKT("45005"), LG("45006"), KT("45008") */
 val Context.networkOperator: String get() = telephonyManager?.networkOperator ?: ""
