@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:Suppress("unused", "UNUSED_ANONYMOUS_PARAMETER")
+@file:Suppress("unused")
 
 package dev.eastar.ktx
 
@@ -95,12 +95,12 @@ private fun Builder.showDialog(): AlertDialog =
         show()
     }
 
-fun Builder.positiveButton(text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setPositiveButton(text) { dialog, which -> cb?.invoke(which) }
-fun Builder.negativeButton(text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setNegativeButton(text) { dialog, which -> cb?.invoke(which) }
-fun Builder.neutralButton(text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setNeutralButton(text) { dialog, which -> cb?.invoke(which) }
-fun Builder.positiveButton(@StringRes text: Int, cb: ((Int) -> Unit)? = null): Builder = setPositiveButton(text) { dialog, which -> cb?.invoke(which) }
-fun Builder.negativeButton(@StringRes text: Int, cb: ((Int) -> Unit)? = null): Builder = setNegativeButton(text) { dialog, which -> cb?.invoke(which) }
-fun Builder.neutralButton(@StringRes text: Int, cb: ((Int) -> Unit)? = null): Builder = setNeutralButton(text) { dialog, which -> cb?.invoke(which) }
+fun Builder.positiveButton(text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setPositiveButton(text) { _, which -> cb?.invoke(which) }
+fun Builder.negativeButton(text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setNegativeButton(text) { _, which -> cb?.invoke(which) }
+fun Builder.neutralButton(text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setNeutralButton(text) { _, which -> cb?.invoke(which) }
+fun Builder.positiveButton(@StringRes text: Int, cb: ((Int) -> Unit)? = null): Builder = setPositiveButton(text) { _, which -> cb?.invoke(which) }
+fun Builder.negativeButton(@StringRes text: Int, cb: ((Int) -> Unit)? = null): Builder = setNegativeButton(text) { _, which -> cb?.invoke(which) }
+fun Builder.neutralButton(@StringRes text: Int, cb: ((Int) -> Unit)? = null): Builder = setNeutralButton(text) { _, which -> cb?.invoke(which) }
 fun Builder.onDismiss(cb: (AlertDialog) -> Unit): Builder = setOnDismissListener { dialog -> cb(dialog as AlertDialog) }
 val Builder.unCancelable: Builder get() = setCancelable(false)
 val Builder.onDismissFinish: Builder get() = onDismiss { (context as? AppCompatActivity)?.finish() }
@@ -118,6 +118,7 @@ object NoMore {
     fun getNoMore(context: Context, key: String): Long = context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
         .getLong(key.md5, 0L)
 
+    @Suppress("MemberVisibilityCanBePrivate")
     fun setNoMore(context: Context, key: String) = context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
         .edit(true) { putLong(key.md5, System.currentTimeMillis()) }
 

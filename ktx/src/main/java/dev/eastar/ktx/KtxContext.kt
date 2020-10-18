@@ -22,13 +22,11 @@ import android.annotation.SuppressLint
 import android.app.*
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
-import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
 import android.os.Bundle
@@ -62,14 +60,7 @@ val Context.versionCode get() = versionCode(packageName)
 fun Context.isInstall(packageName: String) = versionCode(packageName) > 0L
 fun Context.versionCode(packageName: String) = runCatching { PackageInfoCompat.getLongVersionCode(packageManager.getPackageInfo(packageName, 0)) }.getOrDefault(-1L)
 
-infix fun Context.copy(text: String) {
-    val clip = ClipData.newPlainText("label", text)
-    clipboardManager?.run {
-        setPrimaryClip(clip)
-        toast(clip.getItemAt(0).text.toString() + " 복사되었습니다.")
-    }
-}
-
+infix fun Context.copy(text: String) = clipboardManager?.setPrimaryClip(ClipData.newPlainText("label", text))
 
 fun Application.registerActivityStartedLifecycleCallbacks(callback: Activity.() -> Unit) =
     registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
@@ -168,29 +159,7 @@ val Context.isForeground1: Boolean
     get() = activityManager?.runningAppProcesses?.any {
         it.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
     } ?: false
-val Context.isForeground2: Boolean get() = topActivity?.packageName == packageName
-val Context.topActivity: ComponentName? get() = activityManager?.getRunningTasks(1)?.firstOrNull()?.topActivity
 
-@SuppressLint("MissingPermission")
-fun Context.isNetworkAvailable(): Boolean {
-    val connectivityManager: ConnectivityManager? = getSystemService()
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        val capabilities = connectivityManager?.getNetworkCapabilities(connectivityManager.activeNetwork)
-        capabilities ?: return false
-        return when {
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_LOWPAN) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI_AWARE) -> true
-            else -> false
-        }
-    } else {
-        connectivityManager?.activeNetworkInfo?.isConnected ?: false
-    }
-}
 
 @SuppressLint("MissingPermission")
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
