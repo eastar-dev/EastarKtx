@@ -40,7 +40,7 @@ import androidx.fragment.app.Fragment
 //}
 
 fun View.setIntent(clz: Class<out Activity>, vararg extras: Pair<String, Any?>) = setOnClickListener { it.context.startActivity(clz, *extras) }
-fun View.setIntent(intent: Intent) = setOnClickListener { it.context.startActivity(intent) }
+fun View.setIntent(intent: Intent?) = if (intent != null) setOnClickListener { it.context.startActivity(intent) } else setOnClickListener(null)
 
 fun String?.toIntent(): Intent? = kotlin.runCatching { Intent.parseUri(this, Intent.URI_INTENT_SCHEME) }.getOrNull()
 fun Intent?.toText(): String? = kotlin.runCatching { this?.toUri(Intent.URI_INTENT_SCHEME) }.getOrNull()
