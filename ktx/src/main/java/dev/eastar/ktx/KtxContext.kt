@@ -49,12 +49,15 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 
+typealias KtxContext = Unit
+
 val Context.notificationManager: NotificationManager? get() = getSystemService()
 val Context.clipboardManager: ClipboardManager? get() = getSystemService()
 val Context.telephonyManager: TelephonyManager? get() = getSystemService()
 val Context.activityManager: ActivityManager? get() = getSystemService()
 
 val Context.appName: CharSequence get() = packageManager.getApplicationLabel(packageManager.getApplicationInfo(packageName, 0))
+fun Context.getAppName(packageName: String): CharSequence = packageManager.getApplicationLabel(packageManager.getApplicationInfo(packageName, 0))
 val Context.versionName: String get() = packageManager.getPackageInfo(packageName, 0).versionName
 val Context.versionCode get() = versionCode(packageName)
 fun Context.isInstall(packageName: String) = versionCode(packageName) > 0L

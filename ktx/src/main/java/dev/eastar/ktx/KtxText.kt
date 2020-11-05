@@ -33,6 +33,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
 
+typealias KtxText = Unit
+
 val Number.dpf: Float get() = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, toFloat(), Resources.getSystem().displayMetrics)
 val Number.dp: Int get() = dpf.roundToInt()
 val Number.i: Int get() = toInt()
@@ -111,9 +113,10 @@ val String.numberText: String
             val num = ch - '0'
 
             numSum += num
-            result.append((if (po == 0 && num == 1) "일" else number[num])
-                + (if (num > 0) unit4[po % 4] else "")
-                + if (numSum > 0 && po % 4 == 0) unit[po / 4] + "" else ""
+            result.append(
+                (if (po == 0 && num == 1) "일" else number[num])
+                    + (if (num > 0) unit4[po % 4] else "")
+                    + if (numSum > 0 && po % 4 == 0) unit[po / 4] + "" else ""
             )
             if (po % 4 == 0)
                 numSum = 0

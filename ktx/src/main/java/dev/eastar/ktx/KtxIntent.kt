@@ -26,7 +26,7 @@ import android.view.View
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 
-
+typealias KtxIntent = Unit
 //@Suppress("UNCHECKED_CAST")
 //private fun Array<*>.toPair(): Array<kotlin.Pair<String, Any?>> {
 //    require(count() % 2 != 1) { "!!key value must pair" }

@@ -28,6 +28,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 
+typealias KtxAlert = Unit
+
 var newBuilder: ((Context) -> Builder) = NewBuilder()
 
 class NewBuilder : (Context) -> Builder {
