@@ -28,7 +28,8 @@ import android.net.ConnectivityManager
 import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
 import android.net.NetworkRequest
-import android.os.Build
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.telephony.TelephonyManager
 import android.util.TypedValue
@@ -63,6 +64,9 @@ val Context.versionCode get() = versionCode(packageName)
 fun Context.isInstall(packageName: String) = versionCode(packageName) > 0L
 fun Context.versionCode(packageName: String) = runCatching { PackageInfoCompat.getLongVersionCode(packageManager.getPackageInfo(packageName, 0)) }.getOrDefault(-1L)
 
+@Suppress("DEPRECATION")
+fun Context.getInstallerPackageName(packageName: String): String? = if (VERSION.SDK_INT >= VERSION_CODES.R) packageManager.getInstallSourceInfo(packageName).installingPackageName else packageManager.getInstallerPackageName(packageName)
+
 infix fun Context.copy(text: String) = clipboardManager?.setPrimaryClip(ClipData.newPlainText("label", text))
 
 fun Application.registerActivityStartedLifecycleCallbacks(callback: Activity.() -> Unit) =
@@ -91,13 +95,13 @@ fun View.showKeyboard() = context.getSystemService<InputMethodManager>()?.showSo
 
 val Context.isDeviceLock: Boolean
     get() = getSystemService<KeyguardManager>()?.run {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) isDeviceSecure else isKeyguardSecure
+        if (VERSION.SDK_INT >= VERSION_CODES.M) isDeviceSecure else isKeyguardSecure
     } ?: false
 
 val Context.line1Number: String
     @SuppressLint("MissingPermission", "HardwareIds")
     get() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (VERSION.SDK_INT >= VERSION_CODES.O) {
             arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_PHONE_NUMBERS, Manifest.permission.READ_PHONE_STATE)
         } else {
             arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_PHONE_STATE)
@@ -165,7 +169,7 @@ val Context.isForeground1: Boolean
 
 
 @SuppressLint("MissingPermission")
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+@RequiresApi(VERSION_CODES.LOLLIPOP)
 fun Context.registerNetworkCallback() {
     val connectivityManager: ConnectivityManager? = getSystemService()
     connectivityManager?.registerNetworkCallback(NetworkRequest.Builder().build(), object : NetworkCallback() {
