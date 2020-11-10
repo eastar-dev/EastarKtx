@@ -23,12 +23,13 @@ import android.util.Base64
 import android.util.TypedValue
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
+import java.io.FileInputStream
 import java.io.InputStream
 import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
@@ -128,25 +129,34 @@ val InputStream.text get() = bufferedReader().use { it.readText() }
 
 val String.formatPhoneNumber: String get() = PhoneNumberUtils.formatNumber(this, Locale.getDefault().country)
 
+val File.md5: String
+    get() = kotlin.runCatching {
+        FileInputStream(this).use {
+            it.readBytes().md5
+        }
+    }.getOrDefault("")
+
 val CharSequence.md5: String
-    get() = try {
+    get() = toString().toByteArray().md5
+
+val ByteArray.md5: String
+    get() = kotlin.runCatching {
         val digest = MessageDigest.getInstance("MD5")
-        digest.update(toString().toByteArray())
+        digest.update(this)
         val messageDigest = digest.digest()
         messageDigest.hexString
-    } catch (e: NoSuchAlgorithmException) {
-        ""
-    }
-
-val ByteArray.hexString: String get() = joinToString("") { "%02x".format(it) }
+    }.getOrDefault("")
 
 val CharSequence.sha256: String
-    get() = try {
+    get() = toString().toByteArray().sha256
+
+val ByteArray.sha256: String
+    get() = kotlin.runCatching {
         val digest = MessageDigest.getInstance("SHA-256")
-        digest.digest(toString().toByteArray()).hexString
-    } catch (e: Exception) {
-        ""
-    }
+        digest.digest(this).hexString
+    }.getOrDefault("")
+
+val ByteArray.hexString: String get() = joinToString("") { "%02x".format(it) }
 
 val String?.urlDecode: String
     get() = try {
