@@ -27,17 +27,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 
 typealias KtxIntent = Unit
-//@Suppress("UNCHECKED_CAST")
-//private fun Array<*>.toPair(): Array<kotlin.Pair<String, Any?>> {
-//    require(count() % 2 != 1) { "!!key value must pair" }
-//    return toList().zipWithNext { a, b ->
-//        (a to b)
-//    }.filterIndexed { index, _ ->
-//        index % 2 == 0
-//    }.map {
-//        it as kotlin.Pair<String, Any?>
-//    }.toTypedArray()
-//}
 
 fun View.setIntent(clz: Class<out Activity>, vararg extras: Pair<String, Any?>) = setOnClickListener { it.context.startActivity(clz, *extras) }
 fun View.setIntent(intent: Intent?) = if (intent != null) setOnClickListener { it.context.startActivity(intent) } else setOnClickListener(null)

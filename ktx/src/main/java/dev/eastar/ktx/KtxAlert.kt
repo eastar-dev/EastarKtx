@@ -20,6 +20,7 @@ package dev.eastar.ktx
 import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
+import android.view.View
 import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
@@ -29,12 +30,6 @@ import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 
 typealias KtxAlert = Unit
-
-var newBuilder: ((Context) -> Builder) = NewBuilder()
-
-class NewBuilder : (Context) -> Builder {
-    override fun invoke(context: Context): Builder = Builder(context)
-}
 
 /**
  * Example:
@@ -47,66 +42,62 @@ class NewBuilder : (Context) -> Builder {
  *     neutralButton("") { activity.finish() }
  *     unCancelable
  *     setOnDismissListener {
- *     activity.finish()
+ *         activity.finish()
  *     }
- *   }.show()
+ *   }
  * }
  * </code></pre>
  */
-@JvmOverloads
-fun Fragment.alert(@StringRes message: Int, @StringRes title: Int = -1, block: Builder.() -> Unit): AlertDialog =
-    newBuilder(requireContext()).run {
-        if (title != -1)
-            setTitle(title)
-        setMessage(message)
-        block()
-        showDialog()
-    }
+interface IOnAlertBuilder {
+    fun onCreateAlertBuilder(): Builder
+}
 
-@JvmOverloads
-fun Fragment.alert(message: CharSequence, title: CharSequence? = null, block: Builder.() -> Unit): AlertDialog =
-    newBuilder(requireContext()).run {
-        setTitle(title)
-        setMessage(message)
-        block()
-        showDialog()
-    }
+//@formatter:off
+@JvmOverloads fun AppCompatActivity.alert(           message: CharSequence,            title: CharSequence? = null , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
+@JvmOverloads fun Fragment         .alert(           message: CharSequence,            title: CharSequence? = null , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
+@JvmOverloads fun View             .alert(           message: CharSequence,            title: CharSequence? = null , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
+@JvmOverloads fun IOnAlertBuilder  .alert(           message: CharSequence,            title: CharSequence? = null , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
+@JvmOverloads fun AppCompatActivity.alert(@StringRes message: Int         , @StringRes title: Int = -1             , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
+@JvmOverloads fun Fragment         .alert(@StringRes message: Int         , @StringRes title: Int = -1             , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
+@JvmOverloads fun View             .alert(@StringRes message: Int         , @StringRes title: Int = -1             , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
+@JvmOverloads fun IOnAlertBuilder  .alert(@StringRes message: Int         , @StringRes title: Int = -1             , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
 
-@JvmOverloads
-fun AppCompatActivity.alert(@StringRes message: Int, @StringRes title: Int = -1, block: Builder.() -> Unit): AlertDialog =
-    newBuilder(this).run {
-        if (title != -1)
-            setTitle(title)
-        setMessage(message)
-        block()
-        showDialog()
-    }
-
-@JvmOverloads
-fun AppCompatActivity.alert(message: CharSequence, title: CharSequence? = null, block: Builder.() -> Unit): AlertDialog =
-    newBuilder(this).run {
-        setTitle(title)
-        setMessage(message)
-        block()
-        showDialog()
-    }
-
-private fun Builder.showDialog(): AlertDialog =
-    create().apply {
-        setCanceledOnTouchOutside(false)
-        show()
-    }
-
-fun Builder.positiveButton(text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setPositiveButton(text) { _, which -> cb?.invoke(which) }
-fun Builder.negativeButton(text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setNegativeButton(text) { _, which -> cb?.invoke(which) }
-fun Builder.neutralButton(text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setNeutralButton(text) { _, which -> cb?.invoke(which) }
-fun Builder.positiveButton(@StringRes text: Int, cb: ((Int) -> Unit)? = null): Builder = setPositiveButton(text) { _, which -> cb?.invoke(which) }
-fun Builder.negativeButton(@StringRes text: Int, cb: ((Int) -> Unit)? = null): Builder = setNegativeButton(text) { _, which -> cb?.invoke(which) }
-fun Builder.neutralButton(@StringRes text: Int, cb: ((Int) -> Unit)? = null): Builder = setNeutralButton(text) { _, which -> cb?.invoke(which) }
+@JvmOverloads fun Builder.positiveButton (           text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setPositiveButton(text) { _, which -> cb?.invoke(which) }
+@JvmOverloads fun Builder.negativeButton (           text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setNegativeButton(text) { _, which -> cb?.invoke(which) }
+@JvmOverloads fun Builder.neutralButton  (           text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setNeutralButton (text) { _, which -> cb?.invoke(which) }
+@JvmOverloads fun Builder.positiveButton (@StringRes text: Int         , cb: ((Int) -> Unit)? = null): Builder = setPositiveButton(text) { _, which -> cb?.invoke(which) }
+@JvmOverloads fun Builder.negativeButton (@StringRes text: Int         , cb: ((Int) -> Unit)? = null): Builder = setNegativeButton(text) { _, which -> cb?.invoke(which) }
+@JvmOverloads fun Builder.neutralButton  (@StringRes text: Int         , cb: ((Int) -> Unit)? = null): Builder = setNeutralButton (text) { _, which -> cb?.invoke(which) }
+//@formatter:on
 fun Builder.onDismiss(cb: (AlertDialog) -> Unit): Builder = setOnDismissListener { dialog -> cb(dialog as AlertDialog) }
 val Builder.unCancelable: Builder get() = setCancelable(false)
 val Builder.onDismissFinish: Builder get() = onDismiss { (context as? AppCompatActivity)?.finish() }
 //val Builder.onDismissExit: Builder get() = setOnDismissListener { }
+
+/////////////////////////////////////////////////////////////////////////////////
+private fun <CLZ, MSG, TIT> CLZ.showAlertDialog(message: MSG, title: TIT, block: Builder.() -> Unit): AlertDialog =
+    createBuilder().apply {
+        setMessage(message?.toCharSequence(context))
+        setTitle(title?.toCharSequence(context))
+        block()
+    }.create().apply {
+        setCanceledOnTouchOutside(false)
+        show()
+    }
+
+private fun <T> T.createBuilder(): Builder = when (this) {
+    is IOnAlertBuilder -> onCreateAlertBuilder()
+    is Context -> Builder(this)
+    is Fragment -> Builder(requireContext())
+    is View -> Builder(context)
+    else -> throw IllegalAccessException()
+}
+
+private fun <T> T.toCharSequence(context: Context): CharSequence? = when (this) {
+    is Int -> context.getString(this)
+    is CharSequence -> this
+    else -> null
+}
 
 object NoMore {
     private const val NAME = "NoMoreSharedPreferences"
@@ -126,3 +117,4 @@ object NoMore {
 
     fun clear(context: Context) = context.getSharedPreferences(NAME, Context.MODE_PRIVATE).edit(true) { clear() }
 }
+
