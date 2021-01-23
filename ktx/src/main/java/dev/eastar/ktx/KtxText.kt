@@ -17,6 +17,7 @@
 
 package dev.eastar.ktx
 
+import android.content.Context
 import android.content.res.Resources
 import android.telephony.PhoneNumberUtils
 import android.util.Base64
@@ -198,3 +199,9 @@ val CharSequence?.base64Encode: String get() = this?.toString().base64Encode
 val CharSequence?.base64Decode: String get() = this?.toString().base64Decode
 val String?.base64Encode: String get() = kotlin.runCatching { Base64.encodeToString(this?.toByteArray(), Base64.NO_WRAP) }.getOrDefault("")
 val String?.base64Decode: String get() = kotlin.runCatching { Base64.decode(this?.toByteArray(), Base64.NO_WRAP).toString(Charsets.UTF_8) }.getOrDefault("")
+
+fun <T> T.toCharSequence(context: Context): CharSequence? = when (this) {
+    is Int -> context.getString(this)
+    is CharSequence -> this
+    else -> null
+}

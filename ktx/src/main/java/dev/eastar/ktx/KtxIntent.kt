@@ -41,14 +41,15 @@ val Context.mainIntent get() = packageManager.getLaunchIntentForPackage(packageN
 val Fragment.mainIntent get() = requireContext().packageManager.getLaunchIntentForPackage(requireContext().packageName)!!.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
 //-------------------------------------------------------------------------------------
-fun Fragment.startActivity(text: String?) = kotlin.runCatching { startActivity(text.toIntent()) }.getOrDefault(Unit)
-fun Context.startActivity(text: String?) = kotlin.runCatching { startActivity(text.toIntent()) }.getOrDefault(Unit)
+fun Fragment.startActivity(text: String?) = startActivity(text.toIntent())
+fun Context.startActivity(text: String?) = startActivity(text.toIntent())
 fun Fragment.startActivity(clz: Class<out Activity>, vararg extras: Pair<String, Any?>) = startActivity(toIntent(clz, *extras))
 fun Context.startActivity(clz: Class<out Activity>, vararg extras: Pair<String, Any?>) = startActivity(toIntent(clz, *extras))
-fun Activity.startActivityForResult(clz: Class<out Activity>, requestCode: Int = -1, vararg extras: Pair<String, Any?>) = startActivityForResult(toIntent(clz, *extras), requestCode)
-fun Fragment.startActivityForResult(clz: Class<out Activity>, requestCode: Int = -1, vararg extras: Pair<String, Any?>) = startActivityForResult(toIntent(clz, *extras), requestCode)
 fun Context.startPackage(packageName: String) = kotlin.runCatching { startActivity(packageManager.getLaunchIntentForPackage(packageName)) }.getOrDefault(Unit)
 fun Fragment.startPackage(packageName: String) = kotlin.runCatching { startActivity(requireContext().packageManager.getLaunchIntentForPackage(packageName)) }.getOrDefault(Unit)
+fun Activity.startActivityForResult(clz: Class<out Activity>, requestCode: Int = -1, vararg extras: Pair<String, Any?>) = startActivityForResult(toIntent(clz, *extras), requestCode)
+fun Fragment.startActivityForResult(clz: Class<out Activity>, requestCode: Int = -1, vararg extras: Pair<String, Any?>) = startActivityForResult(toIntent(clz, *extras), requestCode)
+
 
 fun Context.startMain() = startActivity(mainIntent)
 fun Fragment.startMain() = startActivity(mainIntent)

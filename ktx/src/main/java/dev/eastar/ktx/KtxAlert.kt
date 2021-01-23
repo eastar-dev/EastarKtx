@@ -85,20 +85,6 @@ private fun <CLZ, MSG, TIT> CLZ.showAlertDialog(message: MSG, title: TIT, block:
         show()
     }
 
-private fun <T> T.createBuilder(): Builder = when (this) {
-    is IOnAlertBuilder -> onCreateAlertBuilder()
-    is Context -> Builder(this)
-    is Fragment -> Builder(requireContext())
-    is View -> Builder(context)
-    else -> throw IllegalAccessException()
-}
-
-private fun <T> T.toCharSequence(context: Context): CharSequence? = when (this) {
-    is Int -> context.getString(this)
-    is CharSequence -> this
-    else -> null
-}
-
 object NoMore {
     private const val NAME = "NoMoreSharedPreferences"
 
@@ -118,3 +104,10 @@ object NoMore {
     fun clear(context: Context) = context.getSharedPreferences(NAME, Context.MODE_PRIVATE).edit(true) { clear() }
 }
 
+private fun <T> T.createBuilder(): Builder = when (this) {
+    is IOnAlertBuilder -> onCreateAlertBuilder()
+    is Context -> Builder(this)
+    is Fragment -> Builder(requireContext())
+    is View -> Builder(context)
+    else -> throw IllegalAccessException()
+}

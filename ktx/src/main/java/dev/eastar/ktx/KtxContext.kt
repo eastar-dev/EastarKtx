@@ -74,7 +74,6 @@ fun Application.registerActivityStartedLifecycleCallbacks(callback: Activity.() 
         override fun onActivityStarted(activity: Activity) {
             callback(activity)
         }
-
         override fun onActivityCreated(activity: Activity, bundle: Bundle?) {}
         override fun onActivityResumed(activity: Activity) {}
         override fun onActivityPaused(activity: Activity) {}
@@ -101,10 +100,13 @@ val Context.isDeviceLock: Boolean
 val Context.line1Number: String
     @SuppressLint("MissingPermission", "HardwareIds")
     get() {
-        if (VERSION.SDK_INT >= VERSION_CODES.O) {
-            arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_PHONE_NUMBERS, Manifest.permission.READ_PHONE_STATE)
-        } else {
-            arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_PHONE_STATE)
+        when {
+            VERSION.SDK_INT >= VERSION_CODES.R ->
+                arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_PHONE_NUMBERS)
+            VERSION.SDK_INT >= VERSION_CODES.O ->
+                arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_PHONE_NUMBERS, Manifest.permission.READ_PHONE_STATE)
+            else ->
+                arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_PHONE_STATE)
         }.any { PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this@line1Number, it) }
             .takeIf { it } ?: return ""
 
@@ -124,18 +126,20 @@ val Context.networkOperatorName: String
         }
     }.getOrDefault("")
 
-infix fun Context.toast(text: CharSequence) = Toast.makeText(this, text, Toast.LENGTH_LONG).show()
-infix fun Fragment.toast(text: CharSequence) = Toast.makeText(requireContext(), text, Toast.LENGTH_LONG).show()
-infix fun Context.toast(@StringRes textRes: Int) = toast(getString(textRes))
-infix fun Fragment.toast(@StringRes textRes: Int) = toast(getString(textRes))
+infix fun Context.toast(text: CharSequence)    = Toast.makeText(asContext, text.toCharSequence(asContext), Toast.LENGTH_SHORT).show()
+infix fun Fragment.toast(text: CharSequence)   = Toast.makeText(asContext, text.toCharSequence(asContext), Toast.LENGTH_SHORT).show()
+infix fun View.toast(text: CharSequence)       = Toast.makeText(asContext, text.toCharSequence(asContext), Toast.LENGTH_SHORT).show()
+infix fun Context.toast(@StringRes text: Int)  = Toast.makeText(asContext, text.toCharSequence(asContext), Toast.LENGTH_SHORT).show()
+infix fun Fragment.toast(@StringRes text: Int) = Toast.makeText(asContext, text.toCharSequence(asContext), Toast.LENGTH_SHORT).show()
+infix fun View.toast(@StringRes text: Int)     = Toast.makeText(asContext, text.toCharSequence(asContext), Toast.LENGTH_SHORT).show()
 
 fun Context.getRawString(@RawRes rawResId: Int) = resources.openRawResource(rawResId).text
-fun Context.getDrawableId(drawable_name: String): Int = getResId(drawable_name, "drawable", packageName)
-fun Context.getResId(name: String, defType: String, defPackage: String): Int = resources.getIdentifier(name, defType, defPackage)
-fun Context.getResourceEntryName(@AnyRes resId: Int): String = resources.getResourceEntryName(resId)
 fun Fragment.getRawString(@RawRes rawResId: Int) = resources.openRawResource(rawResId).text
-fun Fragment.getDrawableId(drawable_name: String): Int = getResId(drawable_name, "drawable", requireContext().packageName)
+fun Context.getDrawableId(drawable_name: String): Int = getResId(drawable_name, "drawable", asContext.packageName)
+fun Fragment.getDrawableId(drawable_name: String): Int = getResId(drawable_name, "drawable", asContext.packageName)
+fun Context.getResId(name: String, defType: String, defPackage: String): Int = resources.getIdentifier(name, defType, defPackage)
 fun Fragment.getResId(name: String, defType: String, defPackage: String): Int = resources.getIdentifier(name, defType, defPackage)
+fun Context.getResourceEntryName(@AnyRes resId: Int): String = resources.getResourceEntryName(resId)
 fun Fragment.getResourceEntryName(@AnyRes resId: Int): String = resources.getResourceEntryName(resId)
 
 fun Activity.keepScreenOn() = window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -182,3 +186,11 @@ fun Context.registerNetworkCallback() {
         }
     })
 }
+
+val <T> T.asContext: Context
+    get() = when (this) {
+        is Context -> this
+        is Fragment -> requireContext()
+        is View -> context
+        else -> throw IllegalAccessException()
+    }
