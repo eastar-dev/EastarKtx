@@ -1,8 +1,18 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'maven-publish'
+}
 
-apply plugin: 'com.github.dcendents.android-maven'
-group = 'com.github.eastar-dev'
+repositories {
+    mavenCentral()
+    google()
+    jcenter()
+    maven { url "https://jitpack.io" }
+}
+
+group = 'com.github.jitpack'
+version = '1.0'
 
 android {
     compileSdkVersion 30
@@ -29,8 +39,16 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-process:2.2.0'
 }
 
-// build a jar with source files
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                from components.release
+                groupId = 'com.github.jitpack'
+                artifactId = 'EastarKtx'
+                version = '1.1.0'
+            }
+        }
+    }
 }
