@@ -56,11 +56,9 @@ interface IOnAlertBuilder {
 @JvmOverloads fun AppCompatActivity.alert(           message: CharSequence,            title: CharSequence? = null , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
 @JvmOverloads fun Fragment         .alert(           message: CharSequence,            title: CharSequence? = null , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
 @JvmOverloads fun View             .alert(           message: CharSequence,            title: CharSequence? = null , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
-@JvmOverloads fun IOnAlertBuilder  .alert(           message: CharSequence,            title: CharSequence? = null , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
 @JvmOverloads fun AppCompatActivity.alert(@StringRes message: Int         , @StringRes title: Int = -1             , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
 @JvmOverloads fun Fragment         .alert(@StringRes message: Int         , @StringRes title: Int = -1             , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
 @JvmOverloads fun View             .alert(@StringRes message: Int         , @StringRes title: Int = -1             , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
-@JvmOverloads fun IOnAlertBuilder  .alert(@StringRes message: Int         , @StringRes title: Int = -1             , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
 
 @JvmOverloads fun Builder.positiveButton (           text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setPositiveButton(text) { _, which -> cb?.invoke(which) }
 @JvmOverloads fun Builder.negativeButton (           text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setNegativeButton(text) { _, which -> cb?.invoke(which) }
