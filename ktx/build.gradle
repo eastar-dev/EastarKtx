@@ -2,15 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.github.dcendents.android-maven'
 
-repositories {
-    mavenCentral()
-    google()
-    jcenter()
-    maven { url "https://jitpack.io" }
-}
-
-group = 'com.github.jitpack'
-version = '1.0.14'
+group = 'com.github.eastar-dev'
 
 android {
     compileSdkVersion 30
@@ -19,7 +11,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 30
         versionCode 14
-        versionName version
+        versionName '1.1.2'
     }
     lintOptions {
         abortOnError false
@@ -37,6 +29,12 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.fragment:fragment-ktx:1.2.5'
     implementation 'androidx.lifecycle:lifecycle-process:2.2.0'
+}
+
+// build a jar with source files
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
 }
 
 //task sourcesJar(type: Jar) {
