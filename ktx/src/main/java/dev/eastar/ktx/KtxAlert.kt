@@ -52,6 +52,10 @@ interface IOnAlertBuilder {
     fun onCreateAlertBuilder(): Builder
 }
 
+typealias DlgBuilder = (context: Context) -> Builder
+
+var newBuilder: DlgBuilder? = null
+
 //@formatter:off
 @JvmOverloads fun AppCompatActivity.alert(           message: CharSequence,            title: CharSequence? = null , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
 @JvmOverloads fun Fragment         .alert(           message: CharSequence,            title: CharSequence? = null , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
@@ -92,8 +96,7 @@ object NoMore {
     }
 
     //다시보지않기를 눌렀는지 확인
-    fun getNoMore(context: Context, key: String): Long = context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
-        .getLong(key.md5, 0L)
+    fun getNoMore(context: Context, key: String): Long = context.getSharedPreferences(NAME, Context.MODE_PRIVATE).getLong(key.md5, 0L)
 
     @Suppress("MemberVisibilityCanBePrivate")
     fun setNoMore(context: Context, key: String) = context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
@@ -102,10 +105,4 @@ object NoMore {
     fun clear(context: Context) = context.getSharedPreferences(NAME, Context.MODE_PRIVATE).edit(true) { clear() }
 }
 
-private fun <T> T.createBuilder(): Builder = when (this) {
-    is IOnAlertBuilder -> onCreateAlertBuilder()
-    is Context -> Builder(this)
-    is Fragment -> Builder(requireContext())
-    is View -> Builder(context)
-    else -> throw IllegalAccessException()
-}
+private fun <T> T.createBuilder(): Builder = newBuilder?.invoke(asContext) ?: (asContext as? IOnAlertBuilder)?.onCreateAlertBuilder() ?: Builder(asContext)
