@@ -31,30 +31,15 @@ import androidx.fragment.app.Fragment
 
 typealias KtxAlert = Unit
 
-/**
- * Example:
- * <pre><code>
- * fun Fragment.test() {
- *   alert("message") {
- *     negativeButton("")
- *     negativeButton(android.R.string.yes) { startActivity(Intent()) }
- *     positiveButton("") { startActivity(Intent()) }
- *     neutralButton("") { activity.finish() }
- *     unCancelable
- *     setOnDismissListener {
- *         activity.finish()
- *     }
- *   }
- * }
- * </code></pre>
- */
+/** alert("message") { positiveButton("OK") { ... } } */
 interface IOnAlertBuilder {
     fun onCreateAlertBuilder(): Builder
 }
 
-typealias DlgBuilder = (context: Context) -> Builder
+/** newBuilder = object : NewBuilder { override fun invoke(context: Context): AlertDialog.Builder = AlertDialog.Builder(context) } */
+typealias NewBuilder = (context: Context) -> Builder
 
-var newBuilder: DlgBuilder? = null
+var newBuilder: NewBuilder? = null
 
 //@formatter:off
 @JvmOverloads fun AppCompatActivity.alert(           message: CharSequence,            title: CharSequence? = null , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
