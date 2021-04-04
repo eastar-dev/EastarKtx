@@ -17,7 +17,6 @@
 
 package dev.eastar.ktx
 
-import android.content.Context
 import android.content.res.Resources
 import android.telephony.PhoneNumberUtils
 import android.util.Base64
