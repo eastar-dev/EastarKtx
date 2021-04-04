@@ -133,6 +133,21 @@ infix fun Context.toast(@StringRes text: Int)  = Toast.makeText(asContext, text.
 infix fun Fragment.toast(@StringRes text: Int) = Toast.makeText(asContext, text.toCharSequence(asContext), Toast.LENGTH_SHORT).show()
 infix fun View.toast(@StringRes text: Int)     = Toast.makeText(asContext, text.toCharSequence(asContext), Toast.LENGTH_SHORT).show()
 
+private val <T> T.asContext: Context
+    get() = when (this) {
+        is Context -> this
+        is Fragment -> requireContext()
+        is View -> context
+        else -> throw IllegalAccessException()
+    }
+
+
+private fun <T> T.toCharSequence(context: Context): CharSequence? = when (this) {
+    is Int -> context.getString(this)
+    is CharSequence -> this
+    else -> null
+}
+
 fun Context.getRawString(@RawRes rawResId: Int) = resources.openRawResource(rawResId).text
 fun Fragment.getRawString(@RawRes rawResId: Int) = resources.openRawResource(rawResId).text
 fun Context.getDrawableId(drawable_name: String): Int = getResId(drawable_name, "drawable", asContext.packageName)
@@ -186,11 +201,3 @@ fun Context.registerNetworkCallback() {
         }
     })
 }
-
-val <T> T.asContext: Context
-    get() = when (this) {
-        is Context -> this
-        is Fragment -> requireContext()
-        is View -> context
-        else -> throw IllegalAccessException()
-    }

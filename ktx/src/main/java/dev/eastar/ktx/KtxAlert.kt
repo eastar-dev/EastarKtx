@@ -91,3 +91,19 @@ object NoMore {
 }
 
 private fun <T> T.createBuilder(): Builder = newBuilder?.invoke(asContext) ?: (asContext as? IOnAlertBuilder)?.onCreateAlertBuilder() ?: Builder(asContext)
+
+
+private val <T> T.asContext: Context
+    get() = when (this) {
+        is Context -> this
+        is Fragment -> requireContext()
+        is View -> context
+        else -> throw IllegalAccessException()
+    }
+
+
+private fun <T> T.toCharSequence(context: Context): CharSequence? = when (this) {
+    is Int -> context.getString(this)
+    is CharSequence -> this
+    else -> null
+}

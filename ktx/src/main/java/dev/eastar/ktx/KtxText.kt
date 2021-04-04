@@ -201,9 +201,3 @@ val String?.base64Encode: String get() = this?.toByteArray().base64Encode
 val String?.base64Decode: String get() = this?.toString().base64Decode
 val ByteArray?.base64Encode: String get() = kotlin.runCatching { Base64.encodeToString(this, Base64.NO_WRAP) }.getOrDefault("")
 val ByteArray?.base64Decode: String get() = kotlin.runCatching { Base64.encodeToString(this, Base64.NO_WRAP) }.getOrDefault("")
-
-fun <T> T.toCharSequence(context: Context): CharSequence? = when (this) {
-    is Int -> context.getString(this)
-    is CharSequence -> this
-    else -> null
-}
