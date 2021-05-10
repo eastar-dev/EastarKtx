@@ -1,5 +1,6 @@
 package dev.eastar.ktx
 
+import android.log.Log
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -32,6 +33,31 @@ class Main : AppCompatActivity() {
                                     .show()
                             }.onFailure {
                                 toast("=> ready to realre start <=")
+                            }
+                        }
+                    })
+                    addView(Button(context).apply {
+                        text = "alert"
+                        setOnClickListener {
+                            AlertDialog.Builder(it.context)
+                                .setTitle("tit")
+                                .setPositiveButton("po") { _, _ -> Log.e(it, "po") }
+                                .setNegativeButton("ne") { _, _ -> Log.e(it, "ne") }
+                                .setOnDismissListener { Log.e(it, "di") }
+                                .setOnCancelListener { Log.e(it, "ca") }
+                                .create()
+                                .show()
+                        }
+                    })
+                    addView(Button(context).apply {
+                        text = "alert"
+                        setOnClickListener {
+                            alert("msg") {
+                                positiveButton("po") { Log.e(it, "po") }
+                                negativeButton("ne") { Log.e(it, "ne") }
+                                onDismiss { Log.e(it, "di") }
+                                //setOnDismissListener { Log.e(it, "di") }
+                                setOnCancelListener { Log.e(it, "ca") }
                             }
                         }
                     })
