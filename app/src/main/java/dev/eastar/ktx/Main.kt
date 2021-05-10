@@ -1,5 +1,6 @@
 package dev.eastar.ktx
 
+import android.content.Context
 import android.log.Log
 import android.os.Bundle
 import android.widget.Button
@@ -10,9 +11,14 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 
 class Main : AppCompatActivity() {
+    private lateinit var dlg: AlertDialog
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView()
+        newBuilder = object : NewBuilder {
+            override fun invoke(context: Context) = CustomDialog.Builder(context)
+        }
     }
 
 
@@ -41,8 +47,8 @@ class Main : AppCompatActivity() {
                         setOnClickListener {
                             AlertDialog.Builder(it.context)
                                 .setTitle("tit")
-                                .setPositiveButton("po") { _, _ -> Log.e(it, "po") }
-                                .setNegativeButton("ne") { _, _ -> Log.e(it, "ne") }
+                                .setPositiveButton("po") { it, _ -> Log.e(it, "po") }
+                                .setNegativeButton("ne") { it, _ -> Log.e(it, "ne") }
                                 .setOnDismissListener { Log.e(it, "di") }
                                 .setOnCancelListener { Log.e(it, "ca") }
                                 .create()
@@ -50,15 +56,21 @@ class Main : AppCompatActivity() {
                         }
                     })
                     addView(Button(context).apply {
-                        text = "alert"
+                        text = "alert c"
                         setOnClickListener {
-                            alert("msg") {
+                            dlg = alert("msg") {
                                 positiveButton("po") { Log.e(it, "po") }
                                 negativeButton("ne") { Log.e(it, "ne") }
-                                onDismiss { Log.e(it, "di") }
-                                //setOnDismissListener { Log.e(it, "di") }
+                                //onDismiss { Log.e(it, "di") }
+                                setOnDismissListener { Log.e(it, "di") }
                                 setOnCancelListener { Log.e(it, "ca") }
                             }
+                        }
+                    })
+                    addView(Button(context).apply {
+                        text = "alert dismiss"
+                        setOnClickListener {
+                            dlg.dismiss()
                         }
                     })
                     repeat(20) {
