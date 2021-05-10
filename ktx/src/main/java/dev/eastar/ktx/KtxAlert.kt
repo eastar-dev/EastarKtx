@@ -36,6 +36,7 @@ interface IOnAlertBuilder {
     fun onCreateAlertBuilder(): Builder
 }
 
+//application
 /** newBuilder = object : NewBuilder { override fun invoke(context: Context): AlertDialog.Builder = AlertDialog.Builder(context) } */
 typealias NewBuilder = (context: Context) -> Builder
 
@@ -96,7 +97,7 @@ private fun <T> T.createBuilder(): Builder = newBuilder?.invoke(asContext) ?: (a
 private val <T> T.asContext: Context
     get() = when (this) {
         is Context -> this
-        is Fragment -> requireContext()
+        is Fragment -> requireActivity()
         is View -> context
         else -> throw IllegalAccessException()
     }
