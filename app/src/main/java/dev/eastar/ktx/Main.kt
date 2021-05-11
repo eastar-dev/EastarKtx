@@ -73,6 +73,30 @@ class Main : AppCompatActivity() {
                             dlg.dismiss()
                         }
                     })
+                    addView(Button(context).apply {
+                        text = "hana alert 1"
+                        setOnClickListener {
+                            HanaDialog.Builder(it.context)
+                                .setPositiveButton("h po") { _, _ -> Log.e("po") }
+                                .setNegativeButton("h ne") { _, _ -> Log.e("ne") }
+                                .setOnDismissListener { Log.e("di") }
+                                .setOnCancelListener { Log.e("ca") }
+                                .create()
+                                .show()
+                        }
+                    })
+                    addView(Button(context).apply {
+                        text = "alert c"
+                        setOnClickListener {
+                            dlg = alert("msg") {
+                                positiveButton("po") { Log.e(it, "po") }
+                                negativeButton("ne") { Log.e(it, "ne") }
+                                //onDismiss { Log.e(it, "di") }
+                                setOnDismissListener { Log.e(it, "di") }
+                                setOnCancelListener { Log.e(it, "ca") }
+                            }
+                        }
+                    })
                     repeat(20) {
                         addView(Button(context).apply { text = "" + it })
                     }
