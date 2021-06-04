@@ -50,12 +50,12 @@ var newBuilder: NewBuilder? = null
 @JvmOverloads fun Fragment         .alert(@StringRes message: Int         , @StringRes title: Int = -1             , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
 @JvmOverloads fun View             .alert(@StringRes message: Int         , @StringRes title: Int = -1             , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
 
-@JvmOverloads fun Builder.positiveButton (           text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setPositiveButton(text) { _, which -> cb?.invoke(which) }
-@JvmOverloads fun Builder.negativeButton (           text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setNegativeButton(text) { _, which -> cb?.invoke(which) }
-@JvmOverloads fun Builder.neutralButton  (           text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setNeutralButton (text) { _, which -> cb?.invoke(which) }
-@JvmOverloads fun Builder.positiveButton (@StringRes text: Int         , cb: ((Int) -> Unit)? = null): Builder = setPositiveButton(text) { _, which -> cb?.invoke(which) }
-@JvmOverloads fun Builder.negativeButton (@StringRes text: Int         , cb: ((Int) -> Unit)? = null): Builder = setNegativeButton(text) { _, which -> cb?.invoke(which) }
-@JvmOverloads fun Builder.neutralButton  (@StringRes text: Int         , cb: ((Int) -> Unit)? = null): Builder = setNeutralButton (text) { _, which -> cb?.invoke(which) }
+@JvmOverloads fun Builder.onPositive (           text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setPositiveButton(text) { _, which -> cb?.invoke(which) }
+@JvmOverloads fun Builder.onNegative (           text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setNegativeButton(text) { _, which -> cb?.invoke(which) }
+@JvmOverloads fun Builder.onNeutral  (           text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setNeutralButton (text) { _, which -> cb?.invoke(which) }
+@JvmOverloads fun Builder.onPositive (@StringRes text: Int         , cb: ((Int) -> Unit)? = null): Builder = setPositiveButton(text) { _, which -> cb?.invoke(which) }
+@JvmOverloads fun Builder.onNegative (@StringRes text: Int         , cb: ((Int) -> Unit)? = null): Builder = setNegativeButton(text) { _, which -> cb?.invoke(which) }
+@JvmOverloads fun Builder.onNeutral  (@StringRes text: Int         , cb: ((Int) -> Unit)? = null): Builder = setNeutralButton (text) { _, which -> cb?.invoke(which) }
 //@formatter:on
 fun Builder.onDismiss(cb: (AlertDialog) -> Unit): Builder = setOnDismissListener { dialog -> cb(dialog as AlertDialog) }
 val Builder.unCancelable: Builder get() = setCancelable(false)
@@ -93,7 +93,6 @@ object NoMore {
 
 private fun <T> T.createBuilder(): Builder = newBuilder?.invoke(asContext) ?: (asContext as? IOnAlertBuilder)?.onCreateAlertBuilder() ?: Builder(asContext)
 
-
 private val <T> T.asContext: Context
     get() = when (this) {
         is Context -> this
@@ -102,9 +101,16 @@ private val <T> T.asContext: Context
         else -> throw IllegalAccessException()
     }
 
-
 private fun <T> T.toCharSequence(context: Context): CharSequence? = when (this) {
     is Int -> context.getString(this)
     is CharSequence -> this
     else -> null
 }
+
+//@formatter:off
+@Deprecated("Use onPositive instead." , ReplaceWith("this.onPositive(text,cb)")) @JvmOverloads fun Builder.positiveButton (           text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = onPositive(text, cb)
+@Deprecated("Use onNegative instead." , ReplaceWith("this.onNegative(text,cb)")) @JvmOverloads fun Builder.negativeButton (           text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = onNegative(text, cb)
+@Deprecated("Use onNeutral  instead." , ReplaceWith("this.onNeutral (text,cb)")) @JvmOverloads fun Builder.neutralButton  (           text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = onNeutral (text, cb)
+@Deprecated("Use onPositive instead." , ReplaceWith("this.onPositive(text,cb)")) @JvmOverloads fun Builder.positiveButton (@StringRes text: Int         , cb: ((Int) -> Unit)? = null): Builder = onPositive(text, cb)
+@Deprecated("Use onNegative instead." , ReplaceWith("this.onNegative(text,cb)")) @JvmOverloads fun Builder.negativeButton (@StringRes text: Int         , cb: ((Int) -> Unit)? = null): Builder = onNegative(text, cb)
+@Deprecated("Use onNeutral  instead." , ReplaceWith("this.onNeutral (text,cb)")) @JvmOverloads fun Builder.neutralButton  (@StringRes text: Int         , cb: ((Int) -> Unit)? = null): Builder = onNeutral (text, cb)

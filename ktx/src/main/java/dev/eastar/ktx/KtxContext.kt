@@ -23,17 +23,21 @@ import android.app.*
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
 import android.net.NetworkRequest
+import android.os.Build
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
+import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.TypedValue
 import android.view.View
+import android.view.ViewTreeObserver
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -74,6 +78,7 @@ fun Application.registerActivityStartedLifecycleCallbacks(callback: Activity.() 
         override fun onActivityStarted(activity: Activity) {
             callback(activity)
         }
+
         override fun onActivityCreated(activity: Activity, bundle: Bundle?) {}
         override fun onActivityResumed(activity: Activity) {}
         override fun onActivityPaused(activity: Activity) {}
@@ -101,12 +106,9 @@ val Context.line1Number: String
     @SuppressLint("MissingPermission", "HardwareIds")
     get() {
         when {
-            VERSION.SDK_INT >= VERSION_CODES.R ->
-                arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_PHONE_NUMBERS)
-            VERSION.SDK_INT >= VERSION_CODES.O ->
-                arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_PHONE_NUMBERS, Manifest.permission.READ_PHONE_STATE)
-            else ->
-                arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_PHONE_STATE)
+            VERSION.SDK_INT >= VERSION_CODES.R -> arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_PHONE_NUMBERS)
+            VERSION.SDK_INT >= VERSION_CODES.O -> arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_PHONE_NUMBERS, Manifest.permission.READ_PHONE_STATE)
+            else -> arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_PHONE_STATE)
         }.any { PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this@line1Number, it) }
             .takeIf { it } ?: return ""
 
@@ -126,20 +128,16 @@ val Context.networkOperatorName: String
         }
     }.getOrDefault("")
 
-infix fun Context.toast(text: CharSequence)    = Toast.makeText(asContext, text.toCharSequence(asContext), Toast.LENGTH_SHORT).show()
-infix fun Fragment.toast(text: CharSequence)   = Toast.makeText(asContext, text.toCharSequence(asContext), Toast.LENGTH_SHORT).show()
-infix fun View.toast(text: CharSequence)       = Toast.makeText(asContext, text.toCharSequence(asContext), Toast.LENGTH_SHORT).show()
-infix fun Context.toast(@StringRes text: Int)  = Toast.makeText(asContext, text.toCharSequence(asContext), Toast.LENGTH_SHORT).show()
+infix fun Context.toast(text: CharSequence) = Toast.makeText(asContext, text.toCharSequence(asContext), Toast.LENGTH_SHORT).show()
+infix fun Fragment.toast(text: CharSequence) = Toast.makeText(asContext, text.toCharSequence(asContext), Toast.LENGTH_SHORT).show()
+infix fun View.toast(text: CharSequence) = Toast.makeText(asContext, text.toCharSequence(asContext), Toast.LENGTH_SHORT).show()
+infix fun Context.toast(@StringRes text: Int) = Toast.makeText(asContext, text.toCharSequence(asContext), Toast.LENGTH_SHORT).show()
 infix fun Fragment.toast(@StringRes text: Int) = Toast.makeText(asContext, text.toCharSequence(asContext), Toast.LENGTH_SHORT).show()
-infix fun View.toast(@StringRes text: Int)     = Toast.makeText(asContext, text.toCharSequence(asContext), Toast.LENGTH_SHORT).show()
+infix fun View.toast(@StringRes text: Int) = Toast.makeText(asContext, text.toCharSequence(asContext), Toast.LENGTH_SHORT).show()
 
-private val <T> T.asContext: Context
-    get() = when (this) {
-        is Context -> this
-        is Fragment -> requireContext()
-        is View -> context
-        else -> throw IllegalAccessException()
-    }
+private val Context.asContext: Context get() = this
+private val Fragment.asContext: Context get() = requireContext()
+private val View.asContext: Context get() = context
 
 
 private fun <T> T.toCharSequence(context: Context): CharSequence? = when (this) {
@@ -198,6 +196,54 @@ fun Context.registerNetworkCallback() {
 
         override fun onAvailable(network: Network) {
             android.util.Log.e("registerNetworkCallback", "Network onAvailable")
+        }
+    })
+}
+
+val Context.widthPixels: Int get() = resources.displayMetrics.widthPixels
+val Context.heightPixels: Int get() = resources.displayMetrics.heightPixels
+
+//알림설정이동
+fun Context.startNotificationSetting() {
+    val intent = Intent()
+    when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
+            intent.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+            intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+        }
+        else -> {
+            intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
+            intent.putExtra("app_package", packageName)
+            intent.putExtra("app_uid", applicationInfo?.uid)
+        }
+    }
+    startActivity(intent)
+}
+
+/**
+//@formatter:off
+override fun onResume() {
+    super.onResume()
+    bb.msg.getClipboardText {
+        val pasteText = it?.replace("\\D".toRegex(), "")
+        if (!pasteText.isNullOrBlank()) {
+            val text = SpannableString("붙여넣기\n$pasteText")
+            text.setSpan(ForegroundColorSpan(0xffeade57.toInt()), text.lastIndexOf(pasteText), text.length, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+            text.setSpan(RelativeSizeSpan(1.2F), text.lastIndexOf(pasteText), text.length, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+            bb.msg.text = text
+            bb.msg.setOnClickListener { ... }
+        }
+    }
+}
+//@formatter:on
+ */
+fun View.getClipboardText(callback: (CharSequence?) -> Unit) {
+    requestFocus()
+    viewTreeObserver.addOnWindowFocusChangeListener(object : ViewTreeObserver.OnWindowFocusChangeListener {
+        override fun onWindowFocusChanged(hasFocus: Boolean) {
+            val pasteText = context.getSystemService<ClipboardManager>()?.primaryClip?.getItemAt(0)?.text
+            callback(pasteText)
+            viewTreeObserver.removeOnWindowFocusChangeListener(this)
         }
     })
 }

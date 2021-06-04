@@ -19,8 +19,12 @@ package dev.eastar.ktx
 
 import android.content.res.Resources
 import android.telephony.PhoneNumberUtils
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.util.Base64
 import android.util.TypedValue
+import android.widget.TextView
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -200,3 +204,33 @@ val String?.base64Encode: String get() = this?.toByteArray().base64Encode
 val String?.base64Decode: String get() = this?.toString().base64Decode
 val ByteArray?.base64Encode: String get() = kotlin.runCatching { Base64.encodeToString(this, Base64.NO_WRAP) }.getOrDefault("")
 val ByteArray?.base64Decode: String get() = kotlin.runCatching { Base64.encodeToString(this, Base64.NO_WRAP) }.getOrDefault("")
+
+fun CharSequence.foregroundColorSpan(color: Int, start: Int, end: Int): SpannableString {
+    val ss: SpannableString = (this as? SpannableString) ?: SpannableString(this.toString())
+
+    if (ss.getSpans(start, end, ForegroundColorSpan::class.java).isEmpty()) {
+        ss.setSpan(ForegroundColorSpan(color), start, end, Spanned.SPAN_INCLUSIVE_INCLUSIVE)
+    }
+    return ss
+}
+
+fun TextView.foregroundColorSpan(color: Int, regularExpression: Regex) {
+    val ss: SpannableString = (text as? SpannableString) ?: SpannableString(text.toString())
+
+    regularExpression.findAll(ss)
+        .forEach {
+            val start = it.range.first
+            val end = it.range.last
+            if (ss.getSpans(start, end, ForegroundColorSpan::class.java).isEmpty()) {
+                ss.setSpan(ForegroundColorSpan(color), start, end, Spanned.SPAN_INCLUSIVE_INCLUSIVE)
+            }
+        }
+
+    setText(ss, TextView.BufferType.SPANNABLE)
+}
+
+infix fun String.withSpace(size: Int): String = replace(("(\\d{$size})").toRegex(), "$1 ").trim()
+val String?.bool: Boolean get() = if (this == null) false else uppercase() == "Y"
+val Boolean.YN: String get() = if (this) "Y" else "N"
+val ByteArray.toHex get() = joinToString("") { "%02X".format(it) }
+
