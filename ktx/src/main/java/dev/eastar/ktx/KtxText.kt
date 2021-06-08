@@ -40,6 +40,14 @@ import kotlin.math.roundToInt
 
 typealias KtxText = Unit
 
+operator fun String.invoke(vararg parameter: Any) = kotlin.runCatching {
+    Class.forName(substringBeforeLast('.')).methods.firstOrNull {
+        it.name == substringAfterLast('.') && it.parameterTypes.size == parameter.size
+    }?.invoke(null, *parameter)
+}.onFailure {
+    it.printStackTrace()
+}
+
 val Number.dpf: Float get() = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, toFloat(), Resources.getSystem().displayMetrics)
 val Number.dp: Int get() = dpf.roundToInt()
 val Number.i: Int get() = toInt()
