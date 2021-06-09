@@ -106,12 +106,13 @@ val Context.line1Number: String
     @SuppressLint("MissingPermission", "HardwareIds")
     get() {
         when {
-            VERSION.SDK_INT >= VERSION_CODES.R -> arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_PHONE_NUMBERS)
             VERSION.SDK_INT >= VERSION_CODES.O -> arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_PHONE_NUMBERS, Manifest.permission.READ_PHONE_STATE)
             else -> arrayOf(Manifest.permission.READ_SMS, Manifest.permission.READ_PHONE_STATE)
-        }.any { PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this@line1Number, it) }
-            .takeIf { it } ?: return ""
-
+        }.any {
+            PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this@line1Number, it)
+        }.takeIf {
+            it
+        } ?: return ""
         return telephonyManager?.line1Number ?: ""
     }
 
