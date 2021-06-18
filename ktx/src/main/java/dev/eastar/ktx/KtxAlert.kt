@@ -46,9 +46,9 @@ var newBuilder: NewBuilder? = null
 @JvmOverloads fun AppCompatActivity.alert(           message: CharSequence,            title: CharSequence? = null , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
 @JvmOverloads fun Fragment         .alert(           message: CharSequence,            title: CharSequence? = null , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
 @JvmOverloads fun View             .alert(           message: CharSequence,            title: CharSequence? = null , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
-@JvmOverloads fun AppCompatActivity.alert(@StringRes message: Int         , @StringRes title: Int = -1             , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
-@JvmOverloads fun Fragment         .alert(@StringRes message: Int         , @StringRes title: Int = -1             , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
-@JvmOverloads fun View             .alert(@StringRes message: Int         , @StringRes title: Int = -1             , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
+@JvmOverloads fun AppCompatActivity.alert(@StringRes message: Int         , @StringRes title: Int?          = null , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
+@JvmOverloads fun Fragment         .alert(@StringRes message: Int         , @StringRes title: Int?          = null , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
+@JvmOverloads fun View             .alert(@StringRes message: Int         , @StringRes title: Int?          = null , block: Builder.() -> Unit): AlertDialog = showAlertDialog(message, title, block)
 
 @JvmOverloads fun Builder.onPositive (           text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setPositiveButton(text) { _, which -> cb?.invoke(which) }
 @JvmOverloads fun Builder.onNegative (           text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = setNegativeButton(text) { _, which -> cb?.invoke(which) }
@@ -102,7 +102,10 @@ private val <T> T.asContext: Context
     }
 
 private fun <T> T.toCharSequence(context: Context): CharSequence? = when (this) {
-    is Int -> context.getString(this)
+    is Int -> {
+        if (this <= 0) null
+        else context.getString(this)
+    }
     is CharSequence -> this
     else -> null
 }
