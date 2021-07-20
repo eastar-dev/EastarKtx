@@ -116,6 +116,14 @@ val Context.line1Number: String
         return telephonyManager?.line1Number ?: ""
     }
 
+fun Context.allPermissions(vararg permissions: String): Boolean = permissions.all {
+    ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+}
+
+fun Context.anyPermissions(vararg permissions: String): Boolean = permissions.any {
+    ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+}
+
 /** SKT("45005"), LG("45006"), KT("45008") */
 val Context.networkOperator: String get() = telephonyManager?.networkOperator ?: ""
 
