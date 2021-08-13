@@ -39,5 +39,5 @@ dependencies {
 
     debugImplementation 'com.github.eastar-dev.EastarLog2:log:2.1.9'
     implementation project(':ktx')
-//    implementation 'com.github.eastar-dev:EastarKtx:master-SNAPSHOT'
+//    implementation 'com.github.eastar-dev:EastarKtx:494b087998'
 }

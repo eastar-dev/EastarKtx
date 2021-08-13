@@ -138,11 +138,3 @@ object NoMore {
             }
     }
 }
-
-//@formatter:off
-@Deprecated("Use onPositive instead." , ReplaceWith("this.onPositive(text,cb)")) @JvmOverloads fun Builder.positiveButton (           text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = onPositive(text, cb)
-@Deprecated("Use onNegative instead." , ReplaceWith("this.onNegative(text,cb)")) @JvmOverloads fun Builder.negativeButton (           text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = onNegative(text, cb)
-@Deprecated("Use onNeutral  instead." , ReplaceWith("this.onNeutral (text,cb)")) @JvmOverloads fun Builder.neutralButton  (           text: CharSequence, cb: ((Int) -> Unit)? = null): Builder = onNeutral (text, cb)
-@Deprecated("Use onPositive instead." , ReplaceWith("this.onPositive(text,cb)")) @JvmOverloads fun Builder.positiveButton (@StringRes text: Int         , cb: ((Int) -> Unit)? = null): Builder = onPositive(text, cb)
-@Deprecated("Use onNegative instead." , ReplaceWith("this.onNegative(text,cb)")) @JvmOverloads fun Builder.negativeButton (@StringRes text: Int         , cb: ((Int) -> Unit)? = null): Builder = onNegative(text, cb)
-@Deprecated("Use onNeutral  instead." , ReplaceWith("this.onNeutral (text,cb)")) @JvmOverloads fun Builder.neutralButton  (@StringRes text: Int         , cb: ((Int) -> Unit)? = null): Builder = onNeutral (text, cb)
