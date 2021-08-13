@@ -24,14 +24,12 @@ android {
         jvmTarget = '1.8'
     }
 }
-
-configurations.all {
-    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-}
-
 repositories {
     maven { url 'https://jitpack.io' }
 }
+//configurations.all {
+//    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+//}
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.5.21"
@@ -44,5 +42,5 @@ dependencies {
 
     debugImplementation 'com.github.eastar-dev.EastarLog2:log:2.1.9'
     implementation project(':ktx')
-//    implementation 'com.github.eastar-dev:EastarKtx:e5a4327bc5'
+//    implementation 'com.github.eastar-dev:EastarKtx:-SNAPSHOT'
 }
