@@ -5,7 +5,7 @@ plugins {
     id 'maven-publish'
 }
 
-//group = 'com.github.eastar-dev'
+group = 'com.github.eastar-dev'
 
 android {
     compileSdkVersion 30
