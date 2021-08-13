@@ -38,6 +38,6 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
 
     debugImplementation 'com.github.eastar-dev.EastarLog2:log:2.1.9'
-//    implementation project(':ktx')
-    implementation 'com.github.eastar-dev:EastarKtx:master-SNAPSHOT'
+    implementation project(':ktx')
+//    implementation 'com.github.eastar-dev:EastarKtx:master-SNAPSHOT'
 }
