@@ -61,10 +61,10 @@ val Context.clipboardManager: ClipboardManager? get() = getSystemService()
 val Context.telephonyManager: TelephonyManager? get() = getSystemService()
 val Context.activityManager: ActivityManager? get() = getSystemService()
 
-val Context.appName: CharSequence get() = packageManager.getApplicationLabel(packageManager.getApplicationInfo(packageName, 0))
-fun Context.getAppName(packageName: String): CharSequence = packageManager.getApplicationLabel(packageManager.getApplicationInfo(packageName, 0))
+val Context.appName get() = packageManager.getApplicationLabel(packageManager.getApplicationInfo(packageName, 0))
 val Context.versionName: String get() = packageManager.getPackageInfo(packageName, 0).versionName
 val Context.versionCode get() = versionCode(packageName)
+fun Context.getAppName(packageName: String) = packageManager.getApplicationLabel(packageManager.getApplicationInfo(packageName, 0))
 fun Context.isInstall(packageName: String) = versionCode(packageName) > 0L
 fun Context.versionCode(packageName: String) = runCatching { PackageInfoCompat.getLongVersionCode(packageManager.getPackageInfo(packageName, 0)) }.getOrDefault(-1L)
 
@@ -116,11 +116,11 @@ val Context.line1Number: String
         return telephonyManager?.line1Number ?: ""
     }
 
-fun Context.allPermissions(vararg permissions: String): Boolean = permissions.all {
+fun Context.permissionsAll(vararg permissions: String): Boolean = permissions.all {
     ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
 }
 
-fun Context.anyPermissions(vararg permissions: String): Boolean = permissions.any {
+fun Context.permissionsAny(vararg permissions: String): Boolean = permissions.any {
     ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
 }
 

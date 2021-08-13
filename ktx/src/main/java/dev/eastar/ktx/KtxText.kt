@@ -59,7 +59,7 @@ val Long.toTimeText: String get() = SimpleDateFormat("yyyy.MM.dd HH:mm:ss", Loca
 fun String?.isNotNullOrBlank() = !this.isNullOrBlank()
 fun String?.isNotNullOrEmpty() = !this.isNullOrEmpty()
 
-val CharSequence.lower get() = toString().toLowerCase(Locale.getDefault())
+val CharSequence.lower get() = toString().lowercase(Locale.getDefault())
 //val String.lower get() = toLowerCase(Locale.getDefault())
 
 fun CharSequence.takePad(length: Int = 10, padChar: Char = ' ') = toString().take(length).padEnd(length, padChar)
@@ -70,7 +70,7 @@ fun String.takeKr(length: Int = 10): String {
     var lengthKr = 0
     return toString()
         .takeWhile {
-            val count = if (it.toInt() in 0x00..0x7f) 1 else 2
+            val count = if (it.code in 0x00..0x7f) 1 else 2
             if (lengthKr + count <= length) {
                 lengthKr += count
                 true
@@ -80,7 +80,7 @@ fun String.takeKr(length: Int = 10): String {
 }
 
 fun String.padEndKr(length: Int = 10, padChar: Char = ' '): String = padEnd(length - (lengthKr - this.length), padChar)
-val CharSequence.lengthKr: Int get() = toString().sumBy { if (it.toInt() in 0x00..0x7f) 1 else 2 }
+val CharSequence.lengthKr: Int get() = toString().sumOf { (if (it.code in 0x00..0x7f) 1 else 2).toInt() }
 
 val CharSequence?.urlEncode: String get() = URLEncoder.encode(this?.toString() ?: "", "UTF-8")
 
@@ -208,8 +208,6 @@ val String?.toPrettyJson: String
 
 val CharSequence?.base64Encode: String get() = this?.toString().base64Encode
 val CharSequence?.base64Decode: String get() = this?.toString().base64Decode
-val String?.base64Encode: String get() = this?.toByteArray().base64Encode
-val String?.base64Decode: String get() = this?.toString().base64Decode
 val ByteArray?.base64Encode: String get() = kotlin.runCatching { Base64.encodeToString(this, Base64.NO_WRAP) }.getOrDefault("")
 val ByteArray?.base64Decode: String get() = kotlin.runCatching { Base64.encodeToString(this, Base64.NO_WRAP) }.getOrDefault("")
 

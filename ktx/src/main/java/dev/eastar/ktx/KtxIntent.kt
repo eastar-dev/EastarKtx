@@ -28,34 +28,28 @@ import androidx.fragment.app.Fragment
 
 typealias KtxIntent = Unit
 
-fun View.setIntent(clz: Class<out Activity>, vararg extras: Pair<String, Any?>) = setOnClickListener { it.context.startActivity(clz, *extras) }
-fun View.setIntent(intent: Intent?) = if (intent != null) setOnClickListener { it.context.startActivity(intent) } else setOnClickListener(null)
+inline fun <reified T : Activity> View.setActivity(vararg extras: Pair<String, Any?>) = setOnClickListener { it.context.startActivity(it.context.toIntent<T>(*extras)) }
+inline fun <reified T : Activity> Fragment.setActivity(vararg extras: Pair<String, Any?>) = context?.let { startActivity(it.toIntent<T>(*extras)) }
+inline fun <reified T : Activity> Context.setActivity(vararg extras: Pair<String, Any?>) = startActivity(toIntent<T>(*extras))
 
+inline fun <reified T : Activity> Fragment.toIntent(vararg extras: Pair<String, Any?>): Intent = Intent(requireContext(), T::class.java).putExtras(bundleOf(*extras))
+inline fun <reified T : Activity> Context.toIntent(vararg extras: Pair<String, Any?>): Intent = Intent(this, T::class.java).putExtras(bundleOf(*extras))
+
+
+fun View.setActivity(intent: Intent?) = if (intent != null) setOnClickListener { it.context.startActivity(intent) } else setOnClickListener(null)
 fun String?.toIntent(): Intent? = kotlin.runCatching { Intent.parseUri(this, Intent.URI_INTENT_SCHEME) }.getOrNull()
 fun Intent?.toText(): String? = kotlin.runCatching { this?.toUri(Intent.URI_INTENT_SCHEME) }.getOrNull()
-
-fun Context.toIntent(clz: Class<out Activity>, vararg extras: Pair<String, Any?>): Intent = Intent(this, clz).putExtras(bundleOf(*extras))
-fun Fragment.toIntent(clz: Class<out Activity>, vararg extras: Pair<String, Any?>): Intent = Intent(requireContext(), clz).putExtras(bundleOf(*extras))
-
-val Context.mainIntent get() = packageManager.getLaunchIntentForPackage(packageName)!!.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-val Fragment.mainIntent get() = requireContext().packageManager.getLaunchIntentForPackage(requireContext().packageName)!!.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-
 //-------------------------------------------------------------------------------------
 fun Fragment.startActivity(text: String?) = startActivity(text.toIntent())
 fun Context.startActivity(text: String?) = startActivity(text.toIntent())
-fun Fragment.startActivity(clz: Class<out Activity>, vararg extras: Pair<String, Any?>) = startActivity(toIntent(clz, *extras))
-fun Context.startActivity(clz: Class<out Activity>, vararg extras: Pair<String, Any?>) = startActivity(toIntent(clz, *extras))
 fun Context.startPackage(packageName: String) = kotlin.runCatching { startActivity(packageManager.getLaunchIntentForPackage(packageName)) }.getOrDefault(Unit)
 fun Fragment.startPackage(packageName: String) = kotlin.runCatching { startActivity(requireContext().packageManager.getLaunchIntentForPackage(packageName)) }.getOrDefault(Unit)
-fun Activity.startActivityForResult(clz: Class<out Activity>, requestCode: Int = -1, vararg extras: Pair<String, Any?>) = startActivityForResult(toIntent(clz, *extras), requestCode)
-fun Fragment.startActivityForResult(clz: Class<out Activity>, requestCode: Int = -1, vararg extras: Pair<String, Any?>) = startActivityForResult(toIntent(clz, *extras), requestCode)
-
-
+val Context.mainIntent get() = packageManager.getLaunchIntentForPackage(packageName)!!.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+val Fragment.mainIntent get() = requireContext().packageManager.getLaunchIntentForPackage(requireContext().packageName)!!.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
 fun Context.startMain() = startActivity(mainIntent)
 fun Fragment.startMain() = startActivity(mainIntent)
 fun Context.startSetting() = startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 fun Fragment.startSetting() = startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${requireContext().packageName}")).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-
 fun Context.startMarket() = startMarket(packageName)
 fun Fragment.startMarket() = startMarket(requireContext().packageName)
 fun Context.startMarket(packageName: String) = kotlin.runCatching { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")!!)) }.getOrDefault(Unit)
