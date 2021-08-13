@@ -24,9 +24,6 @@ android {
         jvmTarget = '1.8'
     }
 }
-repositories {
-    maven { url 'https://jitpack.io' }
-}
 //configurations.all {
 //    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 //}
