@@ -11,6 +11,22 @@ buildscript {
     }
 }
 
+plugins {
+    id "io.gitlab.arturbosch.detekt" version "1.18.1"
+}
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    apply plugin: "io.gitlab.arturbosch.detekt"
+    detekt {
+        toolVersion = "1.18.1"
+        config = files("$rootDir/config/detekt/detekt.yml")
+    }
+}
+
 allprojects {
     repositories {
         google()
